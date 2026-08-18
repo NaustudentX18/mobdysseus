@@ -29,7 +29,14 @@ data class WorkspaceSnapshot(
 data class ConversationRecord(val id: String, val title: String, val messages: List<ChatMessageRecord>)
 data class ChatMessageRecord(val id: String, val author: String, val text: String, val mine: Boolean, val createdAt: Long)
 data class NoteRecord(val id: String, val title: String, val body: String, val updatedAt: Long)
-data class TaskRecord(val id: String, val title: String, val done: Boolean)
+data class TaskRecord(
+    val id: String,
+    val title: String,
+    val done: Boolean,
+    val dueAt: Long? = null,
+    val recurrence: String = "NONE",
+    val remindBeforeMillis: Long = 0,
+)
 data class MemoryRecord(val id: String, val text: String, val createdAt: Long)
 data class GalleryRecord(val id: String, val name: String, val privatePath: String, val createdAt: Long)
 data class WorkspaceSettingsRecord(

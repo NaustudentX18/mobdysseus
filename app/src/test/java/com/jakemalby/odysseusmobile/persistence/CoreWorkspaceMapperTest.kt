@@ -8,6 +8,7 @@ import com.jakemalby.odysseusmobile.core.MobileSettings
 import com.jakemalby.odysseusmobile.core.Note
 import com.jakemalby.odysseusmobile.core.Task
 import com.jakemalby.odysseusmobile.core.Workspace
+import com.jakemalby.odysseusmobile.core.task.TaskRecurrence
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -34,6 +35,23 @@ class CoreWorkspaceMapperTest {
         assertEquals("Deep private work", snapshot.settings.selectedRecipe)
         assertEquals("empty", snapshot.conversations.single { it.id == "empty" }.id)
         assertEquals(emptyList<ChatMessageRecord>(), snapshot.conversations.single { it.id == "empty" }.messages)
+    }
+
+    @Test
+    fun `task due date and recurrence round trip`() {
+        val workspace = Workspace(
+            conversations = listOf(Conversation("c", "Chat", emptyList())),
+            activeConversationId = "c",
+            notes = emptyList(),
+            tasks = listOf(Task("t1", "Pay rent", false, dueAt = 1_800_000_000_000L, recurrence = TaskRecurrence.MONTHLY, remindBeforeMillis = 86_400_000L)),
+            memories = emptyList(), gallery = emptyList(), settings = MobileSettings(),
+        )
+
+        val restored = CoreWorkspaceMapper.toWorkspace(CoreWorkspaceMapper.toSnapshot(workspace))
+
+        assertEquals(1_800_000_000_000L, restored.tasks.single().dueAt)
+        assertEquals(TaskRecurrence.MONTHLY, restored.tasks.single().recurrence)
+        assertEquals(86_400_000L, restored.tasks.single().remindBeforeMillis)
     }
 
     @Test

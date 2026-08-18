@@ -53,7 +53,7 @@ object CoreWorkspaceMapper {
         id = value.id, author = value.author, text = value.text, mine = value.mine, createdAt = value.createdAt,
     )
     private fun noteRecord(value: Note) = NoteRecord(value.id, value.title, value.body, value.updatedAt)
-    private fun taskRecord(value: Task) = TaskRecord(value.id, value.title, value.done)
+    private fun taskRecord(value: Task) = TaskRecord(value.id, value.title, value.done, value.dueAt, value.recurrence.name, value.remindBeforeMillis)
     private fun memoryRecord(value: Memory) = MemoryRecord(value.id, value.text, value.createdAt)
     private fun galleryRecord(value: GalleryItem) = GalleryRecord(value.id, value.name, value.path, value.createdAt)
 
@@ -64,7 +64,7 @@ object CoreWorkspaceMapper {
         id = value.id, author = value.author, text = value.text, mine = value.mine, createdAt = value.createdAt,
     )
     private fun note(value: NoteRecord) = Note(value.id, value.title, value.body, value.updatedAt)
-    private fun task(value: TaskRecord) = Task(value.id, value.title, value.done)
+    private fun task(value: TaskRecord) = Task(value.id, value.title, value.done, value.dueAt, com.jakemalby.odysseusmobile.core.task.TaskRecurrence.valueOf(value.recurrence), value.remindBeforeMillis)
     private fun memory(value: MemoryRecord) = Memory(value.id, value.text, value.createdAt)
     private fun gallery(value: GalleryRecord) = GalleryItem(value.id, value.name, value.privatePath, value.createdAt)
 }

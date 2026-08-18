@@ -80,6 +80,9 @@ internal data class TaskEntity(
     val workspaceId: Int = WorkspaceEntity.SINGLETON_ID,
     val title: String,
     val done: Boolean,
+    val dueAt: Long? = null,
+    val recurrence: String = "NONE",
+    val remindBeforeMillis: Long = 0,
     val sortOrder: Int,
 )
 

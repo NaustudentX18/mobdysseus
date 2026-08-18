@@ -28,6 +28,9 @@ import com.jakemalby.odysseusmobile.core.Workspace
 import com.jakemalby.odysseusmobile.core.memory.MemoryFeatureSupport
 import com.jakemalby.odysseusmobile.core.memory.MemoryGovernance
 import com.jakemalby.odysseusmobile.core.memory.MemoryPersistenceGate
+import com.jakemalby.odysseusmobile.core.task.TaskRecurrence
+import com.jakemalby.odysseusmobile.core.task.TaskSchedule
+import com.jakemalby.odysseusmobile.platform.task.AndroidTaskReminderScheduler as PlatformTaskReminderScheduler
 import java.util.UUID
 
 /** Brain, Notes, and Tasks own their rendering and only receive the Workspace contract. */
@@ -297,13 +300,32 @@ private fun NotesMarkdownBody(body: String) {
 
 @Composable
 internal fun TasksScreen(workspace: Workspace, update: ((Workspace) -> Workspace) -> Unit) {
+    val context = LocalContext.current
+    val reminderScheduler = remember(context) { PlatformTaskReminderScheduler(context) }
     var newTask by rememberSaveable { mutableStateOf("") }
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var filterName by rememberSaveable { mutableStateOf(TaskListFilter.OPEN.name) }
     var deleteCandidateId by rememberSaveable { mutableStateOf<String?>(null) }
+    var dueAt by rememberSaveable { mutableStateOf<Long?>(null) }
+    var recurrence by rememberSaveable { mutableStateOf(TaskRecurrence.NONE) }
+    var showDatePicker by rememberSaveable { mutableStateOf(false) }
     val filter = TaskListFilter.entries.firstOrNull { it.name == filterName } ?: TaskListFilter.OPEN
     val visibleTasks = remember(workspace.tasks, searchQuery, filter) {
         filterTasks(workspace.tasks, searchQuery, filter)
+    }
+
+    fun scheduleReminder(task: Task) {
+        val due = task.dueAt ?: return
+        reminderScheduler.schedule(
+            TaskSchedule(
+                taskId = task.id,
+                dueAtEpochMillis = due,
+                zoneId = java.util.TimeZone.getDefault().id,
+                recurrence = task.recurrence,
+                remindBeforeMillis = task.remindBeforeMillis,
+            ),
+            task.title,
+        )
     }
 
     deleteCandidateId?.let { candidateId ->
@@ -317,6 +339,7 @@ internal fun TasksScreen(workspace: Workspace, update: ((Workspace) -> Workspace
                 text = { Text("“${candidate.title}” will be permanently removed from this device.") },
                 confirmButton = {
                     TextButton(onClick = {
+                        reminderScheduler.cancel(candidateId)
                         update { it.copy(tasks = it.tasks.filterNot { task -> task.id == candidateId }) }
                         deleteCandidateId = null
                     }) { Text("Delete", color = MaterialTheme.colorScheme.error) }
@@ -326,10 +349,29 @@ internal fun TasksScreen(workspace: Workspace, update: ((Workspace) -> Workspace
         }
     }
 
+    if (showDatePicker) {
+        val initial = dueAt ?: System.currentTimeMillis()
+        val cal = java.util.Calendar.getInstance().apply { timeInMillis = initial }
+        android.app.DatePickerDialog(
+            context,
+            { _, year, month, day ->
+                val picked = java.util.Calendar.getInstance().apply {
+                    set(year, month, day, 9, 0, 0)
+                    set(java.util.Calendar.MILLISECOND, 0)
+                }.timeInMillis
+                dueAt = picked
+                showDatePicker = false
+            },
+            cal.get(java.util.Calendar.YEAR),
+            cal.get(java.util.Calendar.MONTH),
+            cal.get(java.util.Calendar.DAY_OF_MONTH),
+        ).show()
+    }
+
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         Text("Tasks", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         Text(
-            "Private, local task tracking for your workspace.",
+            "Private, local task tracking with optional reminders.",
             color = Muted,
             modifier = Modifier.padding(top = 4.dp, bottom = 12.dp),
         )
@@ -344,10 +386,26 @@ internal fun TasksScreen(workspace: Workspace, update: ((Workspace) -> Workspace
             Button(onClick = {
                 val clean = newTask.trim()
                 if (clean.isNotEmpty()) {
-                    update { it.copy(tasks = listOf(Task(UUID.randomUUID().toString(), clean, false)) + it.tasks) }
+                    val task = Task(UUID.randomUUID().toString(), clean, false, dueAt, recurrence)
+                    if (task.dueAt != null) scheduleReminder(task)
+                    update { it.copy(tasks = listOf(task) + it.tasks) }
                     newTask = ""
+                    dueAt = null
+                    recurrence = TaskRecurrence.NONE
                 }
             }) { Text("Add") }
+        }
+        Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            OutlinedButton(onClick = { showDatePicker = true }) {
+                Text(if (dueAt == null) "Set due date" else "Due: ${java.text.DateFormat.getDateInstance().format(java.util.Date(dueAt!!))}")
+            }
+            TaskRecurrence.entries.forEach { option ->
+                FilterChip(
+                    selected = recurrence == option,
+                    onClick = { recurrence = option },
+                    label = { Text(option.name.lowercase()) },
+                )
+            }
         }
         OutlinedTextField(
             searchQuery,
@@ -385,16 +443,25 @@ internal fun TasksScreen(workspace: Workspace, update: ((Workspace) -> Workspace
             }
             items(visibleTasks, key = { it.id }) { task ->
                 Card(colors = CardDefaults.cardColors(containerColor = Panel), border = BorderStroke(1.dp, Border)) {
-                    Row(
-                        Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 7.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Checkbox(task.done, { checked ->
-                            update { state -> state.copy(tasks = state.tasks.map { if (it.id == task.id) it.copy(done = checked) else it }) }
-                        })
-                        Text(task.title, Modifier.weight(1f), color = if (task.done) Muted else Ink)
-                        IconButton(onClick = { deleteCandidateId = task.id }) {
-                            Icon(Icons.Outlined.Delete, "Delete ${task.title}", tint = Muted)
+                    Column(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 7.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(task.done, { checked ->
+                                if (checked) reminderScheduler.cancel(task.id)
+                                update { state -> state.copy(tasks = state.tasks.map { if (it.id == task.id) it.copy(done = checked) else it }) }
+                            })
+                            Text(task.title, Modifier.weight(1f), color = if (task.done) Muted else Ink)
+                            IconButton(onClick = { deleteCandidateId = task.id }) {
+                                Icon(Icons.Outlined.Delete, "Delete ${task.title}", tint = Muted)
+                            }
+                        }
+                        if (task.dueAt != null) {
+                            Text(
+                                "Due ${java.text.DateFormat.getDateInstance().format(java.util.Date(task.dueAt!!))}" +
+                                    if (task.recurrence != TaskRecurrence.NONE) " · repeats ${task.recurrence.name.lowercase()}" else "",
+                                color = Muted,
+                                fontSize = 12.sp,
+                                modifier = Modifier.padding(start = 12.dp, bottom = 4.dp),
+                            )
                         }
                     }
                 }
