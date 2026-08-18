@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
@@ -23,8 +24,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -41,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
@@ -51,6 +51,9 @@ import com.jakemalby.odysseusmobile.core.Workspace
 import com.jakemalby.odysseusmobile.core.seedWorkspace
 import com.jakemalby.odysseusmobile.navigation.Destination
 import com.jakemalby.odysseusmobile.persistence.WorkspacePersistenceController
+import com.jakemalby.odysseusmobile.ui.AdaptiveNavigation
+import com.jakemalby.odysseusmobile.ui.MobdysseusAdaptiveNavigation
+import com.jakemalby.odysseusmobile.ui.adaptiveNavigationFor
 import com.jakemalby.odysseusmobile.ui.mobdysseusImeSafe
 
 class MainActivity : ComponentActivity() {
@@ -114,30 +117,45 @@ private fun MobdysseusApp() {
                     }
                 }
             }
-        } else Scaffold(
-            containerColor = Obsidian,
-            topBar = {
+        } else {
+            val widthDp = LocalConfiguration.current.screenWidthDp
+            val useRail = adaptiveNavigationFor(widthDp) == AdaptiveNavigation.NAVIGATION_RAIL
+            val topBar: @Composable () -> Unit = {
                 TopAppBar(
-                    title = { Row(verticalAlignment = Alignment.CenterVertically) { Text("◢", color = Coral, fontSize = 26.sp, fontWeight = FontWeight.Black); Text(" MOBDYSSEUS", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, letterSpacing = 1.sp) } },
+                    title = { Row(verticalAlignment = Alignment.CenterVertically) { Text("◢", color = Coral, fontSize = 26.sp, fontWeight = FontWeight.Bold); Text(" MOBDYSSEUS", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, letterSpacing = 1.sp) } },
                     actions = { Text(if (saveFailure != null) "SAVE ERROR" else if (current.settings.localOnly) "LOCAL" else "HYBRID", color = Coral, fontSize = 11.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.padding(end = 18.dp)) },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = Obsidian, titleContentColor = Ink),
                 )
-            },
-            bottomBar = { NavigationBar(containerColor = Panel) { Destination.entries.forEach { item -> NavigationBarItem(selected = destination == item, onClick = { destination = item }, icon = { Icon(item.icon, item.label) }, label = { Text(item.label, fontSize = 9.sp) }) } } },
-        ) { padding ->
-            AnimatedContent(destination, modifier = Modifier.padding(padding).mobdysseusImeSafe(), label = "native-workspace") { page ->
-                when (page) {
-                    Destination.CHAT -> ChatScreen(current, ::update)
-                    Destination.COOKBOOK -> CookbookScreen(current, ::update)
-                    Destination.BRAIN -> BrainScreen(current, ::update)
-                    Destination.NOTES -> NotesScreen(current, ::update)
-                    Destination.TASKS -> TasksScreen(current, ::update)
-                    Destination.MORE -> MoreScreen(current, ::update) {
-                        val reset = seedWorkspace()
-                        workspace = reset
-                        persistence.enqueueSave(reset)
+            }
+            val content: @Composable (androidx.compose.foundation.layout.PaddingValues) -> Unit = { padding ->
+                AnimatedContent(destination, modifier = Modifier.padding(padding).mobdysseusImeSafe(), label = "native-workspace") { page ->
+                    when (page) {
+                        Destination.CHAT -> ChatScreen(current, ::update)
+                        Destination.COOKBOOK -> CookbookScreen(current, ::update)
+                        Destination.BRAIN -> BrainScreen(current, ::update)
+                        Destination.NOTES -> NotesScreen(current, ::update)
+                        Destination.TASKS -> TasksScreen(current, ::update)
+                        Destination.MORE -> MoreScreen(current, ::update) {
+                            val reset = seedWorkspace()
+                            workspace = reset
+                            persistence.enqueueSave(reset)
+                        }
                     }
                 }
+            }
+            if (useRail) {
+                Scaffold(containerColor = Obsidian, topBar = topBar) { padding ->
+                    Row(Modifier.fillMaxSize()) {
+                        MobdysseusAdaptiveNavigation(destination, { destination = it }, Modifier.fillMaxHeight())
+                        Box(Modifier.weight(1f)) { content(padding) }
+                    }
+                }
+            } else {
+                Scaffold(
+                    containerColor = Obsidian,
+                    topBar = topBar,
+                    bottomBar = { MobdysseusAdaptiveNavigation(destination, { destination = it }) },
+                ) { padding -> content(padding) }
             }
         }
     }
