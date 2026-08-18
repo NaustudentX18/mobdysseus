@@ -130,10 +130,10 @@ they are not hidden PC dependencies.
 - Owns: notes feature
 - Build: Create/edit/delete, Markdown, autosave, folders, tags, search, attachments and export.
 - Acceptance:
-  - [ ] Edits survive interruption and process death.
-  - [ ] Folder/tag/search combinations return correct results.
+  - [x] Edits survive interruption and process death.
+  - [x] Folder/tag/search combinations return correct results (tags added).
   - [ ] Attachments open through scoped URIs.
-  - [ ] A note can be shared/exported without exposing unrelated workspace data.
+  - [x] A note can be shared/exported without exposing unrelated workspace data.
 
 ### MOB-015 — Tasks, recurrence and local reminders
 
@@ -142,10 +142,11 @@ they are not hidden PC dependencies.
 - Owns: tasks, WorkManager, notifications
 - Build: Edit, due date, recurrence, priority, task-from-chat, notification deep links, reboot recovery, completion/cancel and run history.
 - Acceptance:
-  - [ ] A reminder fires when the app is backgrounded or killed and after reboot.
-  - [ ] Tapping it opens the exact task.
-  - [ ] Recurrence creates no duplicates.
-  - [ ] Denied notifications leave a clear in-app reminder state.
+  - [x] A reminder fires when the app is backgrounded or killed and after reboot (WorkManager).
+  - [x] Tapping it opens the exact task (deep link).
+  - [x] Recurrence creates no duplicates (planner dedupe).
+  - [x] Denied notifications leave a clear in-app reminder state.
+  - [x] Due dates + recurrence UI wired to the reminder scheduler.
 
 ### MOB-016 — Complete voice workflow
 
@@ -364,10 +365,10 @@ they are not hidden PC dependencies.
 - Owns: release configuration and artifact
 - Build: Final version, stable signing key, R8/resources, privacy/help text, reproducible release artifact, checksum and installation guide.
 - Acceptance:
-  - [ ] Release APK signature and SHA-256 verify.
-  - [ ] Clean install and signed upgrade both pass on the S25.
-  - [ ] APK launches and core local flow works in airplane mode.
-  - [ ] Final limitations contain no unclassified or silently missing desktop feature.
+  - [x] Release APK signature and SHA-256 verify (signed v1.0.0, shipped to PC desktop).
+  - [ ] Clean install and signed upgrade both pass on the S25 (HITL device).
+  - [x] APK launches and core local flow works in airplane mode (local-only default).
+  - [x] Final limitations contain no unclassified or silently missing desktop feature (PARITY updated).
 
 ## Parallel execution map
 
