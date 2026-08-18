@@ -52,7 +52,7 @@ object CoreWorkspaceMapper {
     private fun messageRecord(value: Message) = ChatMessageRecord(
         id = value.id, author = value.author, text = value.text, mine = value.mine, createdAt = value.createdAt,
     )
-    private fun noteRecord(value: Note) = NoteRecord(value.id, value.title, value.body, value.updatedAt)
+    private fun noteRecord(value: Note) = NoteRecord(value.id, value.title, value.body, value.updatedAt, value.tags.joinToString(","))
     private fun taskRecord(value: Task) = TaskRecord(value.id, value.title, value.done, value.dueAt, value.recurrence.name, value.remindBeforeMillis)
     private fun memoryRecord(value: Memory) = MemoryRecord(value.id, value.text, value.createdAt)
     private fun galleryRecord(value: GalleryItem) = GalleryRecord(value.id, value.name, value.path, value.createdAt)
@@ -63,7 +63,7 @@ object CoreWorkspaceMapper {
     private fun message(value: ChatMessageRecord) = Message(
         id = value.id, author = value.author, text = value.text, mine = value.mine, createdAt = value.createdAt,
     )
-    private fun note(value: NoteRecord) = Note(value.id, value.title, value.body, value.updatedAt)
+    private fun note(value: NoteRecord) = Note(value.id, value.title, value.body, value.updatedAt, value.tags.split(",").filter { it.isNotBlank() })
     private fun task(value: TaskRecord) = Task(value.id, value.title, value.done, value.dueAt, com.jakemalby.odysseusmobile.core.task.TaskRecurrence.valueOf(value.recurrence), value.remindBeforeMillis)
     private fun memory(value: MemoryRecord) = Memory(value.id, value.text, value.createdAt)
     private fun gallery(value: GalleryRecord) = GalleryItem(value.id, value.name, value.privatePath, value.createdAt)

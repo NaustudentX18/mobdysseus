@@ -64,6 +64,7 @@ internal data class NoteEntity(
     val title: String,
     val body: String,
     val updatedAt: Long,
+    val tags: String = "",
     val sortOrder: Int,
 )
 

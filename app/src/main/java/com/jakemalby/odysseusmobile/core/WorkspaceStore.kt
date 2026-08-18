@@ -48,14 +48,14 @@ class WorkspaceStore(context: Context) {
 
 private inline fun <reified T> JSONArray.mapTyped(block: (Any) -> T): List<T> = List(length()) { block(get(it)) }
 private fun conversationJson(value: Any): Conversation { val o = value as JSONObject; return Conversation(o.getString("id"), o.getString("title"), o.getJSONArray("messages").mapTyped { messageJson(it) }) }
-private fun noteJson(value: Any): Note { val o = value as JSONObject; return Note(o.getString("id"), o.getString("title"), o.getString("body"), o.getLong("updated")) }
+private fun noteJson(value: Any): Note { val o = value as JSONObject; return Note(o.getString("id"), o.getString("title"), o.getString("body"), o.getLong("updated"), o.optJSONArray("tags")?.let { arr -> List(arr.length()) { arr.getString(it) } } ?: emptyList()) }
 private fun taskJson(value: Any): Task { val o = value as JSONObject; return Task(o.getString("id"), o.getString("title"), o.getBoolean("done"), if (o.isNull("dueAt")) null else o.optLong("dueAt"), com.jakemalby.odysseusmobile.core.task.TaskRecurrence.valueOf(o.optString("recurrence", "NONE")), o.optLong("remindBefore", 0)) }
 private fun memoryJson(value: Any): Memory { val o = value as JSONObject; return Memory(o.getString("id"), o.getString("text"), o.getLong("created")) }
 private fun galleryJson(value: Any): GalleryItem { val o = value as JSONObject; return GalleryItem(o.getString("id"), o.getString("name"), o.getString("path"), o.getLong("created")) }
 private fun messageJson(value: Any): Message { val o = value as JSONObject; return Message(o.getString("id"), o.getString("author"), o.getString("text"), o.getBoolean("mine"), o.getLong("created")) }
 private fun Message.toJson() = JSONObject().put("id", id).put("author", author).put("text", text).put("mine", mine).put("created", createdAt)
 private fun Conversation.toJson() = JSONObject().put("id", id).put("title", title).put("messages", JSONArray().apply { messages.forEach { put(it.toJson()) } })
-private fun Note.toJson() = JSONObject().put("id", id).put("title", title).put("body", body).put("updated", updatedAt)
+private fun Note.toJson() = JSONObject().put("id", id).put("title", title).put("body", body).put("updated", updatedAt).put("tags", JSONArray().apply { tags.forEach { put(it) } })
 private fun Task.toJson() = JSONObject().put("id", id).put("title", title).put("done", done).put("dueAt", dueAt ?: JSONObject.NULL).put("recurrence", recurrence.name).put("remindBefore", remindBeforeMillis)
 private fun Memory.toJson() = JSONObject().put("id", id).put("text", text).put("created", createdAt)
 private fun GalleryItem.toJson() = JSONObject().put("id", id).put("name", name).put("path", path).put("created", createdAt)

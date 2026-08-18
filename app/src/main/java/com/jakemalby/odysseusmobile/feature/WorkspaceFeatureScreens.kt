@@ -168,10 +168,12 @@ internal fun BrainScreen(workspace: Workspace, update: ((Workspace) -> Workspace
 internal fun NotesScreen(workspace: Workspace, update: ((Workspace) -> Workspace) -> Unit) {
     var newTitle by rememberSaveable { mutableStateOf("") }
     var newBody by rememberSaveable { mutableStateOf("") }
+    var newTags by rememberSaveable { mutableStateOf("") }
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var editingId by rememberSaveable { mutableStateOf<String?>(null) }
     var editTitle by rememberSaveable { mutableStateOf("") }
     var editBody by rememberSaveable { mutableStateOf("") }
+    var editTags by rememberSaveable { mutableStateOf("") }
     var deleteCandidateId by rememberSaveable { mutableStateOf<String?>(null) }
     var exportCandidateId by rememberSaveable { mutableStateOf<String?>(null) }
     val context = LocalContext.current
@@ -220,7 +222,8 @@ internal fun NotesScreen(workspace: Workspace, update: ((Workspace) -> Workspace
         item { Card(colors = CardDefaults.cardColors(containerColor = Panel), border = BorderStroke(1.dp, Border)) { Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedTextField(newTitle, { newTitle = it }, Modifier.fillMaxWidth(), placeholder = { Text("Note title") }, singleLine = true)
             OutlinedTextField(newBody, { newBody = it }, Modifier.fillMaxWidth(), placeholder = { Text("Write a thought…") }, minLines = 2, maxLines = 5)
-            Button(onClick = { if (newTitle.isNotBlank() || newBody.isNotBlank()) { update { it.copy(notes = listOf(Note(UUID.randomUUID().toString(), newTitle.ifBlank { "Untitled note" }, newBody, System.currentTimeMillis())) + it.notes) }; newTitle = ""; newBody = "" } }) { Text("Save note") }
+            OutlinedTextField(newTags, { newTags = it }, Modifier.fillMaxWidth(), placeholder = { Text("Tags (comma separated)") }, singleLine = true)
+            Button(onClick = { if (newTitle.isNotBlank() || newBody.isNotBlank()) { update { it.copy(notes = listOf(Note(UUID.randomUUID().toString(), newTitle.ifBlank { "Untitled note" }, newBody, System.currentTimeMillis(), parseTags(newTags))) + it.notes) }; newTitle = ""; newBody = ""; newTags = "" } }) { Text("Save note") }
         } } }
         item {
             OutlinedTextField(
@@ -240,12 +243,14 @@ internal fun NotesScreen(workspace: Workspace, update: ((Workspace) -> Workspace
                     if (editingId == note.id) {
                         OutlinedTextField(editTitle, { editTitle = it }, Modifier.fillMaxWidth(), label = { Text("Title") }, singleLine = true)
                         OutlinedTextField(editBody, { editBody = it }, Modifier.fillMaxWidth(), label = { Text("Note") }, minLines = 4)
+                        OutlinedTextField(editTags, { editTags = it }, Modifier.fillMaxWidth(), label = { Text("Tags (comma separated)") }, singleLine = true)
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Button(onClick = {
                                 update { state -> state.copy(notes = state.notes.map { current ->
                                     if (current.id == note.id) current.copy(
                                         title = editTitle.trim().ifBlank { "Untitled note" },
                                         body = editBody,
+                                        tags = parseTags(editTags),
                                         updatedAt = System.currentTimeMillis(),
                                     ) else current
                                 }) }
@@ -261,11 +266,21 @@ internal fun NotesScreen(workspace: Workspace, update: ((Workspace) -> Workspace
                             }
                         }
                         if (note.body.isNotBlank()) NotesMarkdownBody(note.body)
+                        if (note.tags.isNotEmpty()) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                note.tags.forEach { tag ->
+                                    Surface(color = PanelRaised, shape = RoundedCornerShape(50), border = BorderStroke(1.dp, Border)) {
+                                        Text(tag, color = Coral, fontSize = 11.sp, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
+                                    }
+                                }
+                            }
+                        }
                         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                             TextButton(onClick = {
                                 editingId = note.id
                                 editTitle = note.title
                                 editBody = note.body
+                                editTags = note.tags.joinToString(", ")
                             }) { Text("Edit") }
                             TextButton(onClick = {
                                 exportCandidateId = note.id
@@ -487,3 +502,6 @@ private fun filterTasks(tasks: List<Task>, query: String, filter: TaskListFilter
         matchesState && (needle.isEmpty() || task.title.contains(needle, ignoreCase = true))
     }
 }
+
+private fun parseTags(raw: String): List<String> =
+    raw.split(",").map { it.trim() }.filter { it.isNotBlank() }.distinct().take(12)

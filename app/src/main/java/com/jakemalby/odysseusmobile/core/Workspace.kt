@@ -5,7 +5,13 @@ import java.util.UUID
 
 data class Message(val id: String, val author: String, val text: String, val mine: Boolean, val createdAt: Long)
 data class Conversation(val id: String, val title: String, val messages: List<Message>)
-data class Note(val id: String, val title: String, val body: String, val updatedAt: Long)
+data class Note(
+    val id: String,
+    val title: String,
+    val body: String,
+    val updatedAt: Long,
+    val tags: List<String> = emptyList(),
+)
 data class Task(
     val id: String,
     val title: String,

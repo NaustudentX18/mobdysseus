@@ -38,6 +38,20 @@ class CoreWorkspaceMapperTest {
     }
 
     @Test
+    fun `note tags round trip`() {
+        val workspace = Workspace(
+            conversations = listOf(Conversation("c", "Chat", emptyList())),
+            activeConversationId = "c",
+            notes = listOf(Note("n1", "Idea", "Body", 102, tags = listOf("ideas", "work"))),
+            tasks = emptyList(), memories = emptyList(), gallery = emptyList(), settings = MobileSettings(),
+        )
+
+        val restored = CoreWorkspaceMapper.toWorkspace(CoreWorkspaceMapper.toSnapshot(workspace))
+
+        assertEquals(listOf("ideas", "work"), restored.notes.single().tags)
+    }
+
+    @Test
     fun `task due date and recurrence round trip`() {
         val workspace = Workspace(
             conversations = listOf(Conversation("c", "Chat", emptyList())),

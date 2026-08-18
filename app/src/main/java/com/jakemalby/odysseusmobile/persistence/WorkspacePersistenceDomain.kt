@@ -28,7 +28,13 @@ data class WorkspaceSnapshot(
 
 data class ConversationRecord(val id: String, val title: String, val messages: List<ChatMessageRecord>)
 data class ChatMessageRecord(val id: String, val author: String, val text: String, val mine: Boolean, val createdAt: Long)
-data class NoteRecord(val id: String, val title: String, val body: String, val updatedAt: Long)
+data class NoteRecord(
+    val id: String,
+    val title: String,
+    val body: String,
+    val updatedAt: Long,
+    val tags: String = "",
+)
 data class TaskRecord(
     val id: String,
     val title: String,
