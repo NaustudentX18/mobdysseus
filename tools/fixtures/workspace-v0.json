@@ -1,0 +1,19 @@
+{
+  "active": "chat-1",
+  "conversations": [{
+    "id": "chat-1",
+    "title": "Fixture conversation",
+    "messages": [{
+      "id": "message-1",
+      "author": "You",
+      "text": "Keep this private",
+      "mine": true,
+      "created": 1735689600000
+    }]
+  }],
+  "notes": [{"id": "note-1", "title": "Fixture note", "body": "Local only", "updated": 1735689600001}],
+  "tasks": [{"id": "task-1", "title": "Test migration", "done": false}],
+  "memories": [{"id": "memory-1", "text": "Prefers local models", "created": 1735689600002}],
+  "gallery": [{"id": "gallery-1", "name": "private.jpg", "path": "/data/user/0/example/files/gallery/private.jpg", "created": 1735689600003}],
+  "settings": {"recipe": "Private quick chat", "localOnly": true, "compact": false}
+}

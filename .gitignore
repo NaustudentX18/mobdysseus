@@ -1,0 +1,25 @@
+# Gradle / Android
+.gradle/
+.kotlin/
+build/
+app/build/
+local.properties
+*.hprof
+*.log
+
+# Python tooling
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local artifacts
+dist/*.apk
