@@ -23,3 +23,6 @@ Thumbs.db
 
 # Local artifacts
 dist/*.apk
+
+# Signing (never commit)
+keystore/

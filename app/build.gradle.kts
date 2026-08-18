@@ -16,7 +16,25 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 1
-        versionName = "0.1.0"
+        versionName = "1.0.0"
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = rootProject.file("keystore/mobdysseus-release.jks")
+            storePassword = "mobdysseus2026"
+            keyAlias = "mobdysseus"
+            keyPassword = "mobdysseus2026"
+        }
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
+        }
     }
 
     buildFeatures { compose = true; buildConfig = true }
