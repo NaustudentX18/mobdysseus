@@ -30,7 +30,7 @@ import com.jakemalby.odysseusmobile.core.memory.MemoryGovernance
 import com.jakemalby.odysseusmobile.core.memory.MemoryPersistenceGate
 import com.jakemalby.odysseusmobile.core.task.TaskRecurrence
 import com.jakemalby.odysseusmobile.core.task.TaskSchedule
-import com.jakemalby.odysseusmobile.platform.task.AndroidTaskReminderScheduler as PlatformTaskReminderScheduler
+import com.jakemalby.odysseusmobile.core.task.TaskReminderScheduler
 import java.util.UUID
 
 /** Brain, Notes, and Tasks own their rendering and only receive the Workspace contract. */
@@ -314,9 +314,8 @@ private fun NotesMarkdownBody(body: String) {
 }
 
 @Composable
-internal fun TasksScreen(workspace: Workspace, update: ((Workspace) -> Workspace) -> Unit) {
+internal fun TasksScreen(workspace: Workspace, update: ((Workspace) -> Workspace) -> Unit, reminderScheduler: TaskReminderScheduler) {
     val context = LocalContext.current
-    val reminderScheduler = remember(context) { PlatformTaskReminderScheduler(context) }
     var newTask by rememberSaveable { mutableStateOf("") }
     var searchQuery by rememberSaveable { mutableStateOf("") }
     var filterName by rememberSaveable { mutableStateOf(TaskListFilter.OPEN.name) }

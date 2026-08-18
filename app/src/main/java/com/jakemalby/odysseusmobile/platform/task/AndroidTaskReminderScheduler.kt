@@ -26,20 +26,21 @@ import com.jakemalby.odysseusmobile.core.task.ReminderDeliveryState
 import com.jakemalby.odysseusmobile.core.task.StoredTaskReminder
 import com.jakemalby.odysseusmobile.core.task.TaskRecurrence
 import com.jakemalby.odysseusmobile.core.task.TaskReminderPlanner
+import com.jakemalby.odysseusmobile.core.task.TaskReminderScheduler
 import com.jakemalby.odysseusmobile.core.task.TaskSchedule
 import java.util.concurrent.TimeUnit
 
-class AndroidTaskReminderScheduler(context: Context) {
+class AndroidTaskReminderScheduler(context: Context) : TaskReminderScheduler {
     private val appContext = context.applicationContext
     private val workManager = WorkManager.getInstance(appContext)
     private val store = AndroidTaskReminderStore(appContext)
 
-    fun schedule(schedule: TaskSchedule, title: String, nowEpochMillis: Long = System.currentTimeMillis()) {
+    override fun schedule(schedule: TaskSchedule, title: String, nowEpochMillis: Long) {
         workManager.cancelAllWorkByTag(taskTag(schedule.taskId))
         enqueue(schedule, title, nowEpochMillis, storeRecord = true)
     }
 
-    fun cancel(taskId: String) {
+    override fun cancel(taskId: String) {
         workManager.cancelAllWorkByTag(taskTag(taskId))
         store.remove(taskId)
     }

@@ -51,6 +51,7 @@ import com.jakemalby.odysseusmobile.core.Workspace
 import com.jakemalby.odysseusmobile.core.seedWorkspace
 import com.jakemalby.odysseusmobile.navigation.Destination
 import com.jakemalby.odysseusmobile.persistence.WorkspacePersistenceController
+import com.jakemalby.odysseusmobile.platform.task.AndroidTaskReminderScheduler
 import com.jakemalby.odysseusmobile.ui.AdaptiveNavigation
 import com.jakemalby.odysseusmobile.ui.MobdysseusAdaptiveNavigation
 import com.jakemalby.odysseusmobile.ui.adaptiveNavigationFor
@@ -79,6 +80,7 @@ internal val Success = Color(0xFF7BC99A)
 private fun MobdysseusApp() {
     val context = androidx.compose.ui.platform.LocalContext.current
     val persistence = remember { WorkspacePersistenceController(context) }
+    val reminderScheduler = remember(context) { AndroidTaskReminderScheduler(context) }
     var workspace by remember { mutableStateOf<Workspace?>(null) }
     var loadFailure by remember { mutableStateOf<Throwable?>(null) }
     var loadAttempt by remember { mutableStateOf(0) }
@@ -134,7 +136,7 @@ private fun MobdysseusApp() {
                         Destination.COOKBOOK -> CookbookScreen(current, ::update)
                         Destination.BRAIN -> BrainScreen(current, ::update)
                         Destination.NOTES -> NotesScreen(current, ::update)
-                        Destination.TASKS -> TasksScreen(current, ::update)
+                        Destination.TASKS -> TasksScreen(current, ::update, reminderScheduler)
                         Destination.MORE -> MoreScreen(current, ::update) {
                             val reset = seedWorkspace()
                             workspace = reset
