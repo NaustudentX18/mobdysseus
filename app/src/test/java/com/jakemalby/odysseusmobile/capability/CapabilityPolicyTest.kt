@@ -50,5 +50,28 @@ class CapabilityPolicyTest {
         assertNull(policy.beginExecution(id))
     }
 
+    @Test
+    fun webhookDeliveryRequiresApprovalAndRejectsInsecureUrl() {
+        val policy = policy()
+        val outcome = policy.request(DeliverWebhookCall("https://example.com/hook", "{\"event\":\"task\"}"))
+        assertTrue(outcome is PolicyOutcome.RequiresApproval)
+        val id = (outcome as PolicyOutcome.RequiresApproval).record.request.requestId
+        assertNull(policy.beginExecution(id))
+        assertTrue(policy.approve(id, true) is PolicyOutcome.Allowed)
+        assertEquals(ExecutionState.EXECUTING, policy.beginExecution(id)?.state)
+
+        val insecure = policy.request(DeliverWebhookCall("http://example.com/hook", "{}"))
+        assertTrue(insecure is PolicyOutcome.Rejected)
+        assertEquals(ExecutionState.DENIED, (insecure as PolicyOutcome.Rejected).record.state)
+    }
+
+    @Test
+    fun webhookPayloadIsBounded() {
+        val policy = policy()
+        val oversized = policy.request(DeliverWebhookCall("https://example.com/hook", "x".repeat(64 * 1024 + 1)))
+        assertTrue(oversized is PolicyOutcome.Rejected)
+        assertEquals(ExecutionState.DENIED, (oversized as PolicyOutcome.Rejected).record.state)
+    }
+
     private fun policy() = CapabilityExecutionPolicy(clock = Clock.fixed(now, ZoneOffset.UTC))
 }

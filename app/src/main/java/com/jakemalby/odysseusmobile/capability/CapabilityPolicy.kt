@@ -24,6 +24,7 @@ enum class CapabilityId {
     WRITE_CALENDAR,
     READ_CONTACTS,
     OPEN_SAFE_URL,
+    DELIVER_WEBHOOK,
 
     // Reserved deny-list values. They are intentionally never registered.
     SUBPROCESS,
@@ -72,6 +73,7 @@ object CapabilityCatalog {
         CapabilityDescriptor(CapabilityId.WRITE_CALENDAR, "Create or update user-reviewed calendar entries.", RiskLevel.HIGH, SideEffect.LOCAL_WRITE, setOf(DataScope.CALENDAR), true, true),
         CapabilityDescriptor(CapabilityId.READ_CONTACTS, "Read user-selected contacts.", RiskLevel.MODERATE, SideEffect.NONE, setOf(DataScope.CONTACTS), true, true),
         CapabilityDescriptor(CapabilityId.OPEN_SAFE_URL, "Open an explicitly approved http(s) URL in Android.", RiskLevel.MODERATE, SideEffect.NETWORK_ACCESS, setOf(DataScope.URL), false, true),
+        CapabilityDescriptor(CapabilityId.DELIVER_WEBHOOK, "Deliver a signed, bounded payload to an explicitly approved https webhook.", RiskLevel.HIGH, SideEffect.NETWORK_ACCESS, setOf(DataScope.URL), false, true),
     ).associateBy(CapabilityDescriptor::id)
 
     fun descriptor(id: CapabilityId): CapabilityDescriptor? = descriptors[id]
@@ -141,6 +143,10 @@ data class ReadContactsCall(val query: String) : CapabilityCall {
 data class OpenSafeUrlCall(val url: String) : CapabilityCall {
     override val capability = CapabilityId.OPEN_SAFE_URL
     override val summary = "Open URL: ${url.take(120)}"
+}
+data class DeliverWebhookCall(val url: String, val payload: String) : CapabilityCall {
+    override val capability = CapabilityId.DELIVER_WEBHOOK
+    override val summary = "Deliver webhook: ${url.take(120)}"
 }
 
 enum class ApprovalDecision { PENDING, APPROVED, DECLINED, DENIED }
@@ -258,6 +264,7 @@ class CapabilityExecutionPolicy(
         is WriteCalendarCall -> call.title.isNotBlank() && call.endsAt > call.startsAt
         is ReadContactsCall -> call.query.isNotBlank()
         is OpenSafeUrlCall -> call.url.startsWith("https://") || call.url.startsWith("http://")
+        is DeliverWebhookCall -> call.url.startsWith("https://") && call.payload.length <= 64 * 1024
         is ReadWorkspaceCall -> true
     }
 }
