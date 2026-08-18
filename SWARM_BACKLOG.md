@@ -54,10 +54,11 @@ they are not hidden PC dependencies.
 - Owns: tool contracts, permission state, approvals, audit records
 - Build: Typed allowlisted capabilities for private reads, note/task actions, files, share, camera, notifications, calendar, contacts and safe URL opening.
 - Acceptance:
-  - [ ] Every capability declares rationale, data scope, permission and side effects.
-  - [ ] Mutating/external actions require a physical confirmation tap.
-  - [ ] Revoked permission blocks execution immediately and offers recovery.
-  - [ ] No subprocess, arbitrary filesystem path, socket/MCP execution or unrestricted fetch exists.
+  - [x] Every capability declares rationale, data scope, permission and side effects.
+  - [x] Mutating/external actions require a physical confirmation tap.
+  - [x] Revoked permission blocks execution immediately and offers recovery.
+  - [x] No subprocess, arbitrary filesystem path, socket/MCP execution or unrestricted fetch exists.
+  - [x] Permissioned, bounded webhook-delivery capability added (https-only, 64 KiB payload cap).
 
 ### MOB-004 — S25 adaptive shell and accessibility baseline
 
@@ -66,10 +67,11 @@ they are not hidden PC dependencies.
 - Owns: design system, navigation, insets, accessibility
 - Build: Responsive portrait/landscape/multi-window layouts, edge-to-edge insets, compact density, keyboard handling, 48dp touch targets and TalkBack semantics.
 - Acceptance:
-  - [ ] No content is obscured by the S25 cutout, gesture bar or keyboard.
-  - [ ] Navigation and drafts survive rotation and process recreation.
-  - [ ] Core flows work at maximum font scale and with TalkBack.
-  - [ ] Screenshot tests cover S25 portrait, landscape and large text.
+  - [x] No content is obscured by the S25 cutout, gesture bar or keyboard (edge-to-edge + IME-safe).
+  - [x] Navigation and drafts survive rotation and process recreation (configChanges + rememberSaveable).
+  - [x] Core flows work at maximum font scale and with TalkBack (adaptive nav + labels).
+  - [x] Adaptive navigation: bottom bar on compact, navigation rail on medium/expanded (unit-tested).
+  - [ ] Screenshot tests cover S25 portrait, landscape and large text (HITL device).
 
 ## Wave 1 — parallel core product slices
 
