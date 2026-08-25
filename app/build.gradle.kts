@@ -12,8 +12,8 @@ android {
         applicationId = "com.mobdysseus.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 3
-        versionName = "0.3.0"
+        versionCode = 4
+        versionName = "0.4.0"
     }
 
     signingConfigs {
@@ -60,6 +60,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material.icons.core)
+    implementation(libs.markdown.renderer.m3)
     debugImplementation(libs.androidx.ui.tooling)
     testImplementation(libs.junit)
 }

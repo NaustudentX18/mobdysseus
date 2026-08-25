@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import com.mobdysseus.app.data.ChatStore
 import com.mobdysseus.app.provider.ChatMessage
 import com.mobdysseus.app.provider.ProviderAdapter
+import com.mikepenz.markdown.m3.Markdown
 import kotlinx.coroutines.launch
 
 @Composable
@@ -162,12 +163,18 @@ private fun MessageBubble(msg: ChatMessage) {
                     else MaterialTheme.colorScheme.surfaceVariant,
             modifier = Modifier.widthIn(max = 320.dp),
         ) {
-            Text(
-                msg.content,
-                modifier = Modifier.padding(12.dp),
-                color = if (isUser) MaterialTheme.colorScheme.onPrimary
-                        else MaterialTheme.colorScheme.onSurface,
-            )
+            if (isUser) {
+                Text(
+                    msg.content,
+                    modifier = Modifier.padding(12.dp),
+                    color = MaterialTheme.colorScheme.onPrimary,
+                )
+            } else {
+                Markdown(
+                    content = msg.content,
+                    modifier = Modifier.padding(12.dp),
+                )
+            }
         }
     }
 }

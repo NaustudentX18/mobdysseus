@@ -23,9 +23,9 @@ OpenAI-compatible provider, plus local notes and provider settings.
 |---|---|
 | `theme/` | `MobdysseusTheme`, dark green color scheme |
 | `provider/` | `ProviderConfig` (data + presets), `ProviderStore` (SharedPreferences persistence), `ProviderAdapter` (SSE streaming client), `ChatMessage` |
-| `data/` | `NotesStore`, `TasksStore`, `ChatStore` (JSON file persistence) |
+| `data/` | `NotesStore`, `TasksStore`, `ChatStore`, `DocumentsStore` (JSON file persistence) |
 | `cookbook/` | `HardwareDetector`, `ModelRanker` (fit-scoring), `Catalog` (HF + curated) |
-| `ui/` | `MainScreen`, `ChatScreen`, `NotesScreen`, `SettingsScreen` |
+| `ui/` | `MainScreen` (drawer nav), `ChatScreen`, `NotesScreen`, `DocumentsScreen`, `TasksScreen`, `CookbookScreen`, `SettingsScreen` |
 
 ## ProviderAdapter (streaming)
 
@@ -42,6 +42,7 @@ OpenAI-compatible provider, plus local notes and provider settings.
 - Notes → `filesDir/notes.json` (JSON array of `{id,title,body,updatedAt}`).
 - Tasks → `filesDir/tasks.json` (JSON array of `{id,title,done,createdAt}`).
 - Chat transcript → `filesDir/chat.json` (JSON array of `{role,content}`).
+- Documents → `filesDir/documents.json` (JSON array of `{id,title,body,updatedAt}`).
 
 ## Extensibility (planned)
 
