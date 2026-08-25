@@ -3,6 +3,7 @@ package com.mobdysseus.app.ui
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
@@ -18,16 +19,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import com.mobdysseus.app.cookbook.HardwareDetector
 import com.mobdysseus.app.data.NotesStore
 import com.mobdysseus.app.provider.ProviderAdapter
 import com.mobdysseus.app.provider.ProviderStore
 
-enum class Tab { Chat, Notes, Settings }
+enum class Tab { Chat, Notes, Cookbook, Settings }
 
 @Composable
 fun MainScreen(providerStore: ProviderStore, notesStore: NotesStore) {
     var config by remember { mutableStateOf(providerStore.load()) }
     var tab by rememberSaveable { mutableStateOf(Tab.Chat) }
+    val context = LocalContext.current
+    val hardware = remember { HardwareDetector.detect(context) }
 
     Scaffold(
         bottomBar = {
@@ -45,6 +50,12 @@ fun MainScreen(providerStore: ProviderStore, notesStore: NotesStore) {
                     label = { Text("Notes") },
                 )
                 NavigationBarItem(
+                    selected = tab == Tab.Cookbook,
+                    onClick = { tab = Tab.Cookbook },
+                    icon = { Icon(Icons.Filled.Build, contentDescription = "Cookbook") },
+                    label = { Text("Cookbook") },
+                )
+                NavigationBarItem(
                     selected = tab == Tab.Settings,
                     onClick = { tab = Tab.Settings },
                     icon = { Icon(Icons.Filled.Settings, contentDescription = "Settings") },
@@ -57,6 +68,7 @@ fun MainScreen(providerStore: ProviderStore, notesStore: NotesStore) {
             when (tab) {
                 Tab.Chat -> ChatScreen(ProviderAdapter(config))
                 Tab.Notes -> NotesScreen(notesStore)
+                Tab.Cookbook -> CookbookScreen(hardware)
                 Tab.Settings -> SettingsScreen(config) { newCfg ->
                     config = newCfg
                     providerStore.save(newCfg)

@@ -8,8 +8,9 @@ Odysseus project, and it ships under the same **AGPL-3.0-or-later** license.
 
 ## Status
 
-**v0.1.0** — first working build: a native Kotlin + Jetpack Compose app with
-streaming AI chat, local notes, and provider configuration.
+**v0.2.0** — native Kotlin + Jetpack Compose app with streaming AI chat, local
+notes, provider configuration, and an on-device model Cookbook (hardware
+detection + model recommendations).
 
 | Feature | Status |
 |---|---|
@@ -17,7 +18,8 @@ streaming AI chat, local notes, and provider configuration.
 | Provider presets (Ollama local, DeepSeek, OpenAI, custom) | ✅ |
 | Local notes (create / edit / delete) | ✅ |
 | Settings + about | ✅ |
-| On-device LLM (Cookbook port) | 🚧 planned (Phase 2) |
+| Model Cookbook (hardware detection + ranked recommendations) | ✅ |
+| On-device LLM serving (llama.cpp GGUF) | 🚧 planned (Phase 2) |
 | Documents / Email / Calendar / Agents | 🚧 planned (Phase 3) |
 
 ## What Odysseus is

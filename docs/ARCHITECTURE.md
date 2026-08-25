@@ -24,6 +24,7 @@ OpenAI-compatible provider, plus local notes and provider settings.
 | `theme/` | `MobdysseusTheme`, dark green color scheme |
 | `provider/` | `ProviderConfig` (data + presets), `ProviderStore` (SharedPreferences persistence), `ProviderAdapter` (SSE streaming client), `ChatMessage` |
 | `data/` | `NotesStore` (JSON file persistence), `Note` |
+| `cookbook/` | `HardwareDetector`, `ModelRanker` (fit-scoring), `Catalog` (HF + curated) |
 | `ui/` | `MainScreen`, `ChatScreen`, `NotesScreen`, `SettingsScreen` |
 
 ## ProviderAdapter (streaming)
