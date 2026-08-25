@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
@@ -21,14 +22,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.mobdysseus.app.cookbook.HardwareDetector
+import com.mobdysseus.app.data.ChatStore
 import com.mobdysseus.app.data.NotesStore
+import com.mobdysseus.app.data.TasksStore
 import com.mobdysseus.app.provider.ProviderAdapter
 import com.mobdysseus.app.provider.ProviderStore
 
-enum class Tab { Chat, Notes, Cookbook, Settings }
+enum class Tab { Chat, Notes, Tasks, Cookbook, Settings }
 
 @Composable
-fun MainScreen(providerStore: ProviderStore, notesStore: NotesStore) {
+fun MainScreen(
+    providerStore: ProviderStore,
+    notesStore: NotesStore,
+    tasksStore: TasksStore,
+    chatStore: ChatStore,
+) {
     var config by remember { mutableStateOf(providerStore.load()) }
     var tab by rememberSaveable { mutableStateOf(Tab.Chat) }
     val context = LocalContext.current
@@ -50,6 +58,12 @@ fun MainScreen(providerStore: ProviderStore, notesStore: NotesStore) {
                     label = { Text("Notes") },
                 )
                 NavigationBarItem(
+                    selected = tab == Tab.Tasks,
+                    onClick = { tab = Tab.Tasks },
+                    icon = { Icon(Icons.Filled.Check, contentDescription = "Tasks") },
+                    label = { Text("Tasks") },
+                )
+                NavigationBarItem(
                     selected = tab == Tab.Cookbook,
                     onClick = { tab = Tab.Cookbook },
                     icon = { Icon(Icons.Filled.Build, contentDescription = "Cookbook") },
@@ -66,8 +80,9 @@ fun MainScreen(providerStore: ProviderStore, notesStore: NotesStore) {
     ) { padding ->
         Box(Modifier.padding(padding)) {
             when (tab) {
-                Tab.Chat -> ChatScreen(ProviderAdapter(config))
+                Tab.Chat -> ChatScreen(ProviderAdapter(config), chatStore)
                 Tab.Notes -> NotesScreen(notesStore)
+                Tab.Tasks -> TasksScreen(tasksStore)
                 Tab.Cookbook -> CookbookScreen(hardware)
                 Tab.Settings -> SettingsScreen(config) { newCfg ->
                     config = newCfg

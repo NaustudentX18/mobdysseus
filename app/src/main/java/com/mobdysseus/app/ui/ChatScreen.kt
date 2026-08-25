@@ -15,8 +15,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -32,13 +36,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.mobdysseus.app.data.ChatStore
 import com.mobdysseus.app.provider.ChatMessage
 import com.mobdysseus.app.provider.ProviderAdapter
 import kotlinx.coroutines.launch
 
 @Composable
-fun ChatScreen(adapter: ProviderAdapter) {
-    val messages = remember { mutableStateListOf<ChatMessage>() }
+fun ChatScreen(adapter: ProviderAdapter, chatStore: ChatStore) {
+    val messages = remember {
+        mutableStateListOf<ChatMessage>().apply { addAll(chatStore.load()) }
+    }
     var input by remember { mutableStateOf("") }
     var isStreaming by remember { mutableStateOf(false) }
     var streamingContent by remember { mutableStateOf("") }
@@ -49,6 +56,7 @@ fun ChatScreen(adapter: ProviderAdapter) {
         if (input.isBlank() || isStreaming) return
         val text = input.trim()
         messages.add(ChatMessage("user", text))
+        chatStore.save(messages.toList())
         val history = messages.toList()
         input = ""
         isStreaming = true
@@ -61,8 +69,10 @@ fun ChatScreen(adapter: ProviderAdapter) {
                     streamingContent = sb.toString()
                 }
                 messages.add(ChatMessage("assistant", sb.toString()))
+                chatStore.save(messages.toList())
             } catch (e: Exception) {
                 messages.add(ChatMessage("assistant", "Error: " + (e.message ?: "unknown")))
+                chatStore.save(messages.toList())
             } finally {
                 isStreaming = false
                 streamingContent = ""
@@ -78,6 +88,21 @@ fun ChatScreen(adapter: ProviderAdapter) {
     }
 
     Column(Modifier.fillMaxSize()) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text("Chat", style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
+            if (messages.isNotEmpty()) {
+                IconButton(onClick = {
+                    messages.clear()
+                    chatStore.clear()
+                }) {
+                    Icon(Icons.Filled.Delete, contentDescription = "Clear chat")
+                }
+            }
+        }
+
         LazyColumn(
             modifier = Modifier.weight(1f).fillMaxWidth(),
             state = listState,
