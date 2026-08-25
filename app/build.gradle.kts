@@ -12,8 +12,8 @@ android {
         applicationId = "com.mobdysseus.app"
         minSdk = 30
         targetSdk = 36
-        versionCode = 5
-        versionName = "0.5.0"
+        versionCode = 6
+        versionName = "0.6.0"
 
         ndk {
             abiFilters += "arm64-v8a"
@@ -82,4 +82,5 @@ dependencies {
     implementation(libs.llmedge)
     debugImplementation(libs.androidx.ui.tooling)
     testImplementation(libs.junit)
+    testImplementation(libs.json.org)
 }

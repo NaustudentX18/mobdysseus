@@ -18,3 +18,8 @@ dist/
 
 # Upstream research copy (not part of this app's source)
 reference/
+
+# Harness write/edit tool temp-overlay leftovers (must never be committed or left behind)
+*.tmpdir/
+.l2s*
+*.tmp

@@ -20,12 +20,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mobdysseus.app.provider.LocalModelPresets
+import com.mobdysseus.app.provider.ProviderAdapter
 import com.mobdysseus.app.provider.ProviderConfig
 import com.mobdysseus.app.provider.ProviderPresets
+import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsScreen(config: ProviderConfig, onSave: (ProviderConfig) -> Unit) {
@@ -35,6 +38,8 @@ fun SettingsScreen(config: ProviderConfig, onSave: (ProviderConfig) -> Unit) {
     var useLocal by remember { mutableStateOf(config.useLocal) }
     var localRepoId by remember { mutableStateOf(config.localRepoId) }
     var localFile by remember { mutableStateOf(config.localFile) }
+    val scope = rememberCoroutineScope()
+    var testStatus by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = Modifier
@@ -115,6 +120,32 @@ fun SettingsScreen(config: ProviderConfig, onSave: (ProviderConfig) -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
             )
+            Spacer(Modifier.height(8.dp))
+            Button(
+                onClick = {
+                    testStatus = "Testing…"
+                    val cfg = ProviderConfig(
+                        baseUrl = baseUrl.trim(),
+                        model = model.trim(),
+                        apiKey = apiKey.trim(),
+                        useLocal = false,
+                        localRepoId = localRepoId,
+                        localFile = localFile,
+                    )
+                    scope.launch {
+                        testStatus = if (ProviderAdapter(cfg).healthCheck()) "Reachable" else "Unreachable"
+                    }
+                },
+            ) { Text("Test connection") }
+            testStatus?.let {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "Connection: $it",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (it == "Reachable") MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
 
         Spacer(Modifier.height(16.dp))
@@ -138,13 +169,14 @@ fun SettingsScreen(config: ProviderConfig, onSave: (ProviderConfig) -> Unit) {
         Text("About", style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(8.dp))
         Text(
-            "Mobdysseus v0.5.0\n" +
+            "Mobdysseus v0.6.0\n" +
                 "A mobile rebuild of the Odysseus self-hosted AI workspace, " +
                 "optimised for Samsung Galaxy S25.\n\n" +
                 "Runs standalone on-device, and can connect to a self-hosted " +
                 "server for local LLMs and MCP tools.\n\n" +
-                "Licensed AGPL-3.0-or-later. This is a community build and is " +
-                "not affiliated with the upstream Odysseus project.",
+                "Licensed AGPL-3.0-or-later. See THIRD_PARTY_NOTICES.md for " +
+                "attributions. This is a community build and is not affiliated " +
+                "with the upstream Odysseus project.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

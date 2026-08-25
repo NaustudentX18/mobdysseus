@@ -69,3 +69,5 @@ cp app/build/outputs/apk/release/app-release.apk dist/Mobdysseus-v0.1.0.apk
 3. **Phase 2**: on-device Cookbook (llama.cpp GGUF) — see `docs/COOKBOOK_SPEC.md`.
 4. **Phase 3–4**: email/calendar/gallery/agents, then DeX / One UI / NPU polish.
 5. Compliance pass (AGPL notices, About screen, rebrand, privacy policy) before any store release — see `docs/PLAN.md` §7.
+
+> **Build note:** always create files via bash heredoc (never the `write`/`edit` tools — they leave dangling symlinks). See `docs/DEV-GUIDE.md`; run `bash scripts/guard.sh` before commits.

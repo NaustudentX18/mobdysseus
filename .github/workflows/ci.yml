@@ -21,6 +21,12 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
+      - name: Guard (no symlinks / temp-overlay leftovers)
+        run: bash scripts/guard.sh
+
+      - name: Run unit tests
+        run: ./gradlew :app:testDebugUnitTest --console=plain
+
       - name: Build debug APK
         run: ./gradlew :app:assembleDebug --console=plain
 

@@ -4,6 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.HttpURLConnection
@@ -74,4 +75,19 @@ class ProviderAdapter(private val config: ProviderConfig) : ChatEngine {
             }
         }
     }.flowOn(Dispatchers.IO)
+
+    /** Returns true if the configured base URL is reachable (any HTTP response counts). */
+    suspend fun healthCheck(): Boolean = withContext(Dispatchers.IO) {
+        if (config.baseUrl.isBlank()) return@withContext false
+        try {
+            val conn = URL(config.baseUrl).openConnection() as HttpURLConnection
+            conn.requestMethod = "GET"
+            conn.connectTimeout = 8000
+            conn.readTimeout = 8000
+            conn.responseCode // any response = reachable
+            true
+        } catch (_: Exception) {
+            false
+        }
+    }
 }

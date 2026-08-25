@@ -8,6 +8,7 @@ composeBom = "2025.06.01"
 junit = "4.13.2"
 markdownRenderer = "0.37.0"
 llmedge = "0.4.7.2"
+json = "20240303"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -23,6 +24,7 @@ androidx-material-icons-core = { group = "androidx.compose.material", name = "ma
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 markdown-renderer-m3 = { group = "com.mikepenz", name = "multiplatform-markdown-renderer-m3", version.ref = "markdownRenderer" }
 llmedge = { group = "io.github.aatricks", name = "llmedge", version.ref = "llmedge" }
+json-org = { group = "org.json", name = "json", version.ref = "json" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
