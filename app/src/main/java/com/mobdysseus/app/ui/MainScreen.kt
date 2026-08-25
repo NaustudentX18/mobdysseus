@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.mobdysseus.app.cookbook.HardwareDetector
+import com.mobdysseus.app.local.LocalLlmEngine
 import com.mobdysseus.app.data.ChatStore
 import com.mobdysseus.app.data.DocumentsStore
 import com.mobdysseus.app.data.NotesStore
@@ -70,6 +71,13 @@ fun MainScreen(
     val hardware = remember { HardwareDetector.detect(context) }
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val chatEngine = remember(config) {
+        if (config.useLocal) {
+            LocalLlmEngine(context, scope, config.localRepoId, config.localFile)
+        } else {
+            ProviderAdapter(config)
+        }
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -109,7 +117,7 @@ fun MainScreen(
         ) { padding ->
             Box(Modifier.padding(padding)) {
                 when (tab) {
-                    Tab.Chat -> ChatScreen(ProviderAdapter(config), chatStore)
+                    Tab.Chat -> ChatScreen(chatEngine, chatStore)
                     Tab.Notes -> NotesScreen(notesStore)
                     Tab.Documents -> DocumentsScreen(documentsStore)
                     Tab.Tasks -> TasksScreen(tasksStore)

@@ -37,13 +37,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.mobdysseus.app.data.ChatStore
+import com.mobdysseus.app.provider.ChatEngine
 import com.mobdysseus.app.provider.ChatMessage
-import com.mobdysseus.app.provider.ProviderAdapter
 import com.mikepenz.markdown.m3.Markdown
 import kotlinx.coroutines.launch
 
 @Composable
-fun ChatScreen(adapter: ProviderAdapter, chatStore: ChatStore) {
+fun ChatScreen(engine: ChatEngine, chatStore: ChatStore) {
     val messages = remember {
         mutableStateListOf<ChatMessage>().apply { addAll(chatStore.load()) }
     }
@@ -65,7 +65,7 @@ fun ChatScreen(adapter: ProviderAdapter, chatStore: ChatStore) {
         scope.launch {
             val sb = StringBuilder()
             try {
-                adapter.stream(history).collect { delta ->
+                engine.stream(history).collect { delta ->
                     sb.append(delta)
                     streamingContent = sb.toString()
                 }

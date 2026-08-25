@@ -8,7 +8,10 @@ Odysseus project, and it ships under the same **AGPL-3.0-or-later** license.
 
 ## Status
 
-**v0.4.0** — native Kotlin + Jetpack Compose app with streaming AI chat
+**v0.5.0** — native Kotlin + Jetpack Compose app that runs standalone on-device
+(streaming AI chat via a local GGUF model through llama.cpp), with Markdown,
+notes, documents, tasks, and a model Cookbook. Optionally connects to a
+self-hosted server for local LLMs and MCP tools.
 (Markdown rendering + persistent history), notes, documents, tasks, provider
 configuration, and an on-device model Cookbook.
 
@@ -23,7 +26,7 @@ configuration, and an on-device model Cookbook.
 | Chat history persistence | ✅ |
 | Settings + about | ✅ |
 | Model Cookbook (hardware detection + ranked recommendations) | ✅ |
-| On-device LLM serving (llama.cpp GGUF) | 🚧 planned (Phase 2) |
+| On-device LLM (GGUF via llama.cpp, offline) | ✅ |
 | Documents / Email / Calendar / Agents | 🚧 planned (Phase 3) |
 
 ## What Odysseus is
@@ -47,7 +50,8 @@ client. Mobdysseus rebuilds that experience as a native Android client.
 ## Build
 
 Toolchain (verified): JDK 17, Gradle 8.14 (wrapper), AGP 8.11.1, Kotlin 2.2.20,
-Compose BOM 2025.06.01, compileSdk 36 / minSdk 26 / targetSdk 36.
+Compose BOM 2025.06.01, compileSdk 36 / minSdk 30 / targetSdk 36. (minSdk 30 is
+required by the llmedge on-device engine; the Galaxy S25 ships Android 15.)
 
 ```bash
 ./gradlew :app:assembleDebug          # debug APK

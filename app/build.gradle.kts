@@ -10,10 +10,14 @@ android {
 
     defaultConfig {
         applicationId = "com.mobdysseus.app"
-        minSdk = 26
+        minSdk = 30
         targetSdk = 36
-        versionCode = 4
-        versionName = "0.4.0"
+        versionCode = 5
+        versionName = "0.5.0"
+
+        ndk {
+            abiFilters += "arm64-v8a"
+        }
     }
 
     signingConfigs {
@@ -32,6 +36,20 @@ android {
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
+            )
+        }
+    }
+
+    packaging {
+        jniLibs {
+            excludes += listOf(
+                "**/libsdcpp.so",
+                "**/libwhisper_jni.so",
+                "**/libbark_jni.so",
+                "**/libonnxruntime.so",
+                "**/libonnxruntime4j_jni.so",
+                "**/libmlkit_google_ocr_pipeline.so",
+                "**/libmlkitcommonpipeline.so",
             )
         }
     }
@@ -61,6 +79,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material.icons.core)
     implementation(libs.markdown.renderer.m3)
+    implementation(libs.llmedge)
     debugImplementation(libs.androidx.ui.tooling)
     testImplementation(libs.junit)
 }

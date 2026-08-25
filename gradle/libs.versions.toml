@@ -7,6 +7,7 @@ activityCompose = "1.9.3"
 composeBom = "2025.06.01"
 junit = "4.13.2"
 markdownRenderer = "0.37.0"
+llmedge = "0.4.7.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -21,6 +22,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 androidx-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 markdown-renderer-m3 = { group = "com.mikepenz", name = "multiplatform-markdown-renderer-m3", version.ref = "markdownRenderer" }
+llmedge = { group = "io.github.aatricks", name = "llmedge", version.ref = "llmedge" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

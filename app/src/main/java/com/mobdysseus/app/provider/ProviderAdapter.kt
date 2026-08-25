@@ -16,9 +16,9 @@ data class ChatMessage(val role: String, val content: String)
  * Talks to any endpoint that speaks the /v1/chat/completions contract
  * (OpenAI, DeepSeek, Ollama, MiniMax, local servers, ...).
  */
-class ProviderAdapter(private val config: ProviderConfig) {
+class ProviderAdapter(private val config: ProviderConfig) : ChatEngine {
 
-    fun stream(messages: List<ChatMessage>): Flow<String> = flow {
+    override fun stream(messages: List<ChatMessage>): Flow<String> = flow {
         val endpoint = config.baseUrl.trimEnd('/') + "/chat/completions"
         val conn = URL(endpoint).openConnection() as HttpURLConnection
         conn.requestMethod = "POST"

@@ -25,6 +25,7 @@ OpenAI-compatible provider, plus local notes and provider settings.
 | `provider/` | `ProviderConfig` (data + presets), `ProviderStore` (SharedPreferences persistence), `ProviderAdapter` (SSE streaming client), `ChatMessage` |
 | `data/` | `NotesStore`, `TasksStore`, `ChatStore`, `DocumentsStore` (JSON file persistence) |
 | `cookbook/` | `HardwareDetector`, `ModelRanker` (fit-scoring), `Catalog` (HF + curated) |
+| `local/` | `LocalLlmEngine` (on-device GGUF via llmedge/llama.cpp JNI) |
 | `ui/` | `MainScreen` (drawer nav), `ChatScreen`, `NotesScreen`, `DocumentsScreen`, `TasksScreen`, `CookbookScreen`, `SettingsScreen` |
 
 ## ProviderAdapter (streaming)
