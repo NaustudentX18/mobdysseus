@@ -1,0 +1,20 @@
+# Gradle / build
+.gradle/
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Local config / secrets
+local.properties
+release.keystore
+*.apk
+dist/
+
+# IDE
+.idea/
+*.iml
+.DS_Store
+
+# Upstream research copy (not part of this app's source)
+reference/
