@@ -45,7 +45,10 @@ class LocalLlmEngine(
     private fun buildPrompt(messages: List<ChatMessage>): String {
         val sb = StringBuilder()
         sb.append("You are Mobdysseus, a helpful assistant running fully on-device. Answer clearly and concisely.\n\n")
-        for (m in messages) {
+        // Bound multi-turn context to the most recent turns so long conversations
+        // stay within the generation token budget (maxTokens = 1024).
+        val recent = messages.takeLast(8)
+        for (m in recent) {
             when (m.role) {
                 "system" -> sb.append("System: ").append(m.content).append("\n\n")
                 "user" -> sb.append("User: ").append(m.content).append("\n\n")

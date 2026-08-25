@@ -8,7 +8,9 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
@@ -49,7 +51,7 @@ import com.mobdysseus.app.provider.ProviderAdapter
 import com.mobdysseus.app.provider.ProviderStore
 import kotlinx.coroutines.launch
 
-enum class Tab { Chat, Notes, Documents, Tasks, Calendar, Memory, Cookbook, Mcp, Settings }
+enum class Tab { Chat, Notes, Documents, Tasks, Calendar, Memory, Gallery, Research, Cookbook, Mcp, Settings }
 
 private data class Section(val tab: Tab, val label: String, val icon: ImageVector)
 
@@ -59,7 +61,9 @@ private val sections = listOf(
     Section(Tab.Documents, "Documents", Icons.AutoMirrored.Filled.List),
     Section(Tab.Tasks, "Tasks", Icons.Filled.Check),
     Section(Tab.Calendar, "Calendar", Icons.Filled.DateRange),
-    Section(Tab.Memory, "Memory", Icons.Filled.Star),
+    Section(Tab.Memory, "Memory", Icons.Filled.Info),
+    Section(Tab.Gallery, "Gallery", Icons.Filled.Star),
+    Section(Tab.Research, "Research", Icons.Filled.Search),
     Section(Tab.Cookbook, "Cookbook", Icons.Filled.Build),
     Section(Tab.Mcp, "MCP Tools", Icons.Filled.Share),
     Section(Tab.Settings, "Settings", Icons.Filled.Settings),
@@ -135,6 +139,8 @@ fun MainScreen(
                     Tab.Tasks -> TasksScreen(tasksStore)
                     Tab.Calendar -> CalendarScreen(calendarStore)
                     Tab.Memory -> MemoryScreen(memoryStore)
+                    Tab.Gallery -> GalleryScreen()
+                    Tab.Research -> ResearchScreen()
                     Tab.Cookbook -> CookbookScreen(hardware)
                     Tab.Mcp -> McpScreen(mcpServerStore)
                     Tab.Settings -> SettingsScreen(config) { newCfg ->

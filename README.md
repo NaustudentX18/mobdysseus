@@ -1,71 +1,50 @@
 # Mobdysseus
 
-A **native Android rebuild** of [Odysseus](https://github.com/odysseus-dev/odysseus) —
-the self-hosted AI workspace — designed and optimised for the **Samsung Galaxy S25**.
+**A mobile, standalone-first rebuild of the [Odysseus](https://github.com/odysseus-dev/odysseus) self-hosted AI workspace, designed and optimised for Samsung Galaxy S25.**
 
-Mobdysseus is a community build. It is **not** affiliated with the upstream
-Odysseus project, and it ships under the same **AGPL-3.0-or-later** license.
+Mobdysseus runs fully on-device out of the box — notes, tasks, documents, calendar, memory, photo gallery, an AI chat powered by an on-device LLM (llama.cpp GGUF), and a cookbook that picks the right model for your hardware. It can also connect to a self-hosted server for a remote LLM and to [MCP](https://modelcontextprotocol.io) servers to reach external tools. No account, no cloud, no account, no telemetry.
 
-## Status
+## Screens / features
 
-**v0.5.0** — native Kotlin + Jetpack Compose app that runs standalone on-device
-(streaming AI chat via a local GGUF model through llama.cpp), with Markdown,
-notes, documents, tasks, and a model Cookbook. Optionally connects to a
-self-hosted server for local LLMs and MCP tools.
-(Markdown rendering + persistent history), notes, documents, tasks, provider
-configuration, and an on-device model Cookbook.
-
-| Feature | Status |
+| Area | What it does |
 |---|---|
-| Streaming chat (OpenAI-compatible providers) | ✅ |
-| Provider presets (Ollama local, DeepSeek, OpenAI, custom) | ✅ |
-| Local notes (create / edit / delete) | ✅ |
-| Tasks (todos with completion) | ✅ |
-| Documents (Markdown editor with preview) | ✅ |
-| Markdown rendering in chat | ✅ |
-| Chat history persistence | ✅ |
-| Settings + about | ✅ |
-| Model Cookbook (hardware detection + ranked recommendations) | ✅ |
-| On-device LLM (GGUF via llama.cpp, offline) | ✅ |
-| Documents / Email / Calendar / Agents | 🚧 planned (Phase 3) |
-
-## What Odysseus is
-
-Upstream Odysseus is a self-hosted AI workspace: chat + agents, deep research,
-documents, email, notes/tasks/calendar, gallery, and local-model workflows,
-served by a Python/FastAPI backend (~488 HTTP endpoints) with a vanilla-JS web
-client. Mobdysseus rebuilds that experience as a native Android client.
+| Chat | Streaming chat over OpenAI-compatible endpoints *and* on-device GGUF (llama.cpp via [llmedge](https://github.com/aatricks/llmedge)); markdown rendering; conversation history. |
+| Notes / Tasks / Documents | Plain, offline JSON-backed stores (mirror `data/NotesStore.kt`). |
+| Calendar | Month grid, events, add/edit/delete (offline). |
+| Memory | Free-form knowledge entries with full-text search. |
+| Gallery | Device photo grid + full-screen viewer (`MediaStore`). |
+| Research | Web search (DuckDuckGo Instant Answer) rendered as cards. |
+| Cookbook | Hardware detection + model recommendation tuned for Galaxy S25. |
+| MCP Tools | Add self-hosted MCP servers, discover tools, invoke them, stream results. |
+| Settings | Model source (On-device / Cloud API), provider presets, on-device GGUF picker, test connection, About/licenses. |
 
 ## Architecture
 
-- **Native UI** — Kotlin + Jetpack Compose (Material 3), forest-green dark theme.
-- **Provider client** — a dependency-light OpenAI-compatible client
-  (`ProviderAdapter`) that streams chat via SSE against any
-  `/v1/chat/completions` endpoint (OpenAI, DeepSeek, Ollama, local servers…).
-- **Local-first** — notes persist to app-private storage (`NotesStore`).
-- See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) and
-  [`docs/PLAN.md`](docs/PLAN.md) for the full roadmap and the on-device
-  Cookbook spec ([`docs/COOKBOOK_SPEC.md`](docs/COOKBOOK_SPEC.md)).
+- **On-device first.** No mandatory server. The default LLM is a local GGUF (3B–4B Q4) run via `llmedge`; everything else is local JSON persistence.
+- **Connect when you want.** Point Settings at any OpenAI-compatible endpoint, or add MCP servers, to pull in remote LLMs and tools.
+- **Modules** live under `app/src/main/java/com/mobdysseus/app/`: `data` (stores), `ui` (screens), `provider` (remote LLM), `local` (on-device inference), `mcp` (client), `service` (foreground inference service), `cookbook` (model ranking), `research`.
 
 ## Build
 
-Toolchain (verified): JDK 17, Gradle 8.14 (wrapper), AGP 8.11.1, Kotlin 2.2.20,
-Compose BOM 2025.06.01, compileSdk 36 / minSdk 30 / targetSdk 36. (minSdk 30 is
-required by the llmedge on-device engine; the Galaxy S25 ships Android 15.)
+Requires JDK 17, the Android SDK (compileSdk 36, minSdk 30), AGP 8.11.1 + Gradle 8.14 (wrapper included).
 
 ```bash
-./gradlew :app:assembleDebug          # debug APK
-./gradlew :app:assembleRelease        # signed release (keystore defaults in app/build.gradle.kts)
+./gradlew :app:testDebugUnitTest   # unit tests
+./gradlew :app:assembleDebug       # debug APK
+./gradlew :app:assembleRelease     # signed release APK (release.keystore)
 ```
 
-The signed release APK lands in `app/build/outputs/apk/release/`; a copy is kept
-in `dist/` and pushed to `/sdcard/Download` for on-device install.
+Release signing uses `release.keystore` (alias `mobdysseus`); password defaults to `mobdysseus123` or `MOBDYSSEUS_KEYSTORE_PASS`.
+
+## Repo hygiene
+
+- **`scripts/guard.sh`** fails if any symlink / temp-overlay leftover appears in `app/src`, `docs`, or `licenses`. It runs in CI.
+- **`docs/DEV-GUIDE.md`** — the rule that files are created with bash heredocs, never the session `write`/`edit` tools.
+- **`docs/`** — `PLAN.md`, `ARCHITECTURE.md`, `COOKBOOK_SPEC.md`, `SMOKE-TEST.md`, `HANDOVER.md`, `ATTACK-PLAN.md`, `PRIVACY.md`, `DEV-GUIDE.md`.
+- **`THIRD_PARTY_NOTICES.md`** + **`licenses/`** — attribution for llmedge, Compose, ML Kit, and the bundled llama.cpp/ggml, whisper.cpp, bark.cpp.
 
 ## License
 
-AGPL-3.0-or-later — see [LICENSE](LICENSE). Upstream attribution and third-party
-notices are preserved in [`reference/ACKNOWLEDGMENTS.md`](reference/ACKNOWLEDGMENTS.md).
+**AGPL-3.0-or-later.** This is a community build and is **not affiliated with** the upstream Odysseus project. Third-party attributions are in `THIRD_PARTY_NOTICES.md`.
 
-> ⚠️ This is a community/unofficial build of an AGPL project. The name
-> "Mobdysseus" is distinct from upstream "Odysseus" to avoid confusion; all
-> copyright notices and the AGPL license text are retained.
+>Your data stays on-device by default. See `docs/PRIVACY.md` for the three explicit cases where the app touches the network (a cloud API provider, an MCP server, or a model download).
