@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.8.0] — 2025-08-26
+### Added
+- **Skills** tab + marketplace: browse and install skills (Ask Your Data, Privacy Verdict, One-Tap Capture, Photo OCR, plus roadmap skills).
+- **Cookbook**: model cards are now clickable — download a recommended GGUF with live progress, then it's selected for Chat.
+
+### Fixed
+- **On-device inference crash**: the app could shut down when answering with a downloaded local model and then fail to reopen. The LLM engine is now loaded lazily (off the main thread) so a corrupt/oversized model can never crash the app at startup; all llmedge failures (memory, corrupt model, worker crash) are caught and shown as friendly messages; the cached GGUF is validated (size + magic bytes) and a corrupt file is deleted so it can be re-downloaded.
+
+### Changed
+- Version 0.8.0 (versionCode 9).
+
+All notable changes. Mobdysseus follows [SemVer](https://semver.org). APKs ship in `dist/`.
+
 ## [0.7.1] — 2025-08-26
 ### Added
 - Samsung DeX / multi-window support (`resizeableActivity`).

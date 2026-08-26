@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
@@ -40,18 +41,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.mobdysseus.app.cookbook.HardwareDetector
 import com.mobdysseus.app.local.LocalLlmEngine
+import com.mobdysseus.app.local.ModelDownloadManager
 import com.mobdysseus.app.data.CalendarStore
 import com.mobdysseus.app.data.ChatStore
 import com.mobdysseus.app.data.DocumentsStore
 import com.mobdysseus.app.data.McpServerStore
 import com.mobdysseus.app.data.MemoryStore
 import com.mobdysseus.app.data.NotesStore
+import com.mobdysseus.app.data.SkillsStore
 import com.mobdysseus.app.data.TasksStore
 import com.mobdysseus.app.provider.ProviderAdapter
 import com.mobdysseus.app.provider.ProviderStore
 import kotlinx.coroutines.launch
 
-enum class Tab { Chat, Notes, Documents, Tasks, Calendar, Memory, Gallery, Research, Cookbook, Mcp, Settings }
+enum class Tab { Chat, Notes, Documents, Tasks, Calendar, Memory, Gallery, Research, Cookbook, Skills, Mcp, Settings }
 
 private data class Section(val tab: Tab, val label: String, val icon: ImageVector)
 
@@ -62,9 +65,10 @@ private val sections = listOf(
     Section(Tab.Tasks, "Tasks", Icons.Filled.Check),
     Section(Tab.Calendar, "Calendar", Icons.Filled.DateRange),
     Section(Tab.Memory, "Memory", Icons.Filled.Info),
-    Section(Tab.Gallery, "Gallery", Icons.Filled.Star),
+    Section(Tab.Gallery, "Gallery", Icons.Filled.Favorite),
     Section(Tab.Research, "Research", Icons.Filled.Search),
     Section(Tab.Cookbook, "Cookbook", Icons.Filled.Build),
+    Section(Tab.Skills, "Skills", Icons.Filled.Star),
     Section(Tab.Mcp, "MCP Tools", Icons.Filled.Share),
     Section(Tab.Settings, "Settings", Icons.Filled.Settings),
 )
@@ -80,6 +84,7 @@ fun MainScreen(
     calendarStore: CalendarStore,
     memoryStore: MemoryStore,
     mcpServerStore: McpServerStore,
+    skillsStore: SkillsStore,
 ) {
     var config by remember { mutableStateOf(providerStore.load()) }
     var tab by rememberSaveable { mutableStateOf(Tab.Chat) }
@@ -87,6 +92,7 @@ fun MainScreen(
     val hardware = remember { HardwareDetector.detect(context) }
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val downloadManager = remember { ModelDownloadManager(context, scope) }
     val chatEngine = remember(config) {
         if (config.useLocal) {
             LocalLlmEngine(context, scope, config.localRepoId, config.localFile)
@@ -141,7 +147,11 @@ fun MainScreen(
                     Tab.Memory -> MemoryScreen(memoryStore)
                     Tab.Gallery -> GalleryScreen()
                     Tab.Research -> ResearchScreen()
-                    Tab.Cookbook -> CookbookScreen(hardware)
+                    Tab.Cookbook -> CookbookScreen(hardware, downloadManager) { repoId, filename ->
+                        config = config.copy(useLocal = true, localRepoId = repoId, localFile = filename)
+                        providerStore.save(config)
+                    }
+                    Tab.Skills -> SkillsScreen(skillsStore)
                     Tab.Mcp -> McpScreen(mcpServerStore)
                     Tab.Settings -> SettingsScreen(config) { newCfg ->
                         config = newCfg

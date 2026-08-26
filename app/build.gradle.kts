@@ -12,8 +12,8 @@ android {
         applicationId = "com.mobdysseus.app"
         minSdk = 30
         targetSdk = 36
-        versionCode = 8
-        versionName = "0.7.1"
+        versionCode = 9
+        versionName = "0.8.0"
 
         ndk {
             abiFilters += "arm64-v8a"

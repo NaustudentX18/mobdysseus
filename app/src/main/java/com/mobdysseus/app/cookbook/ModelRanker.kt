@@ -6,6 +6,7 @@ data class CandidateModel(
     val paramsB: Float,
     val quant: String,
     val license: String,
+    val filename: String = "",
 )
 
 data class RankedModel(

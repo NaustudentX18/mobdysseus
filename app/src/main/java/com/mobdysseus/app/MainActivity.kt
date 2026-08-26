@@ -9,6 +9,7 @@ import com.mobdysseus.app.data.DocumentsStore
 import com.mobdysseus.app.data.McpServerStore
 import com.mobdysseus.app.data.MemoryStore
 import com.mobdysseus.app.data.NotesStore
+import com.mobdysseus.app.data.SkillsStore
 import com.mobdysseus.app.data.TasksStore
 import com.mobdysseus.app.provider.ProviderStore
 import com.mobdysseus.app.theme.MobdysseusTheme
@@ -25,9 +26,10 @@ class MainActivity : ComponentActivity() {
         val calendarStore = CalendarStore(this)
         val memoryStore = MemoryStore(this)
         val mcpServerStore = McpServerStore(this)
+        val skillsStore = SkillsStore(this)
         setContent {
             MobdysseusTheme {
-                MainScreen(providerStore, notesStore, tasksStore, chatStore, documentsStore, calendarStore, memoryStore, mcpServerStore)
+                MainScreen(providerStore, notesStore, tasksStore, chatStore, documentsStore, calendarStore, memoryStore, mcpServerStore, skillsStore)
             }
         }
     }

@@ -69,8 +69,13 @@ fun ChatScreen(engine: ChatEngine, chatStore: ChatStore) {
                     sb.append(delta)
                     streamingContent = sb.toString()
                 }
-                messages.add(ChatMessage("assistant", sb.toString()))
-                chatStore.save(messages.toList())
+                // llmedge failures are emitted as a single error chunk, so they
+                // surface here as a normal assistant message. Only persist a
+                // message when something was actually produced.
+                if (sb.isNotEmpty()) {
+                    messages.add(ChatMessage("assistant", sb.toString()))
+                    chatStore.save(messages.toList())
+                }
             } catch (e: Exception) {
                 messages.add(ChatMessage("assistant", "Error: " + (e.message ?: "unknown")))
                 chatStore.save(messages.toList())

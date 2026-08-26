@@ -26,6 +26,9 @@ class ModelDownloadManager(
      * Fetch [repoId]/[filename] from HuggingFace (or return the cached copy),
      * emitting progress via [onProgress].
      *
+     * The resolved file is validated (exists, > 1 MB, GGUF magic) before being
+     * returned; a corrupt/incomplete download is deleted so the user can retry.
+     *
      * @return the cached model [File].
      * @throws IllegalStateException with a descriptive message if prefetch fails.
      */
@@ -44,6 +47,9 @@ class ModelDownloadManager(
                     onProgress(fraction.coerceIn(0f, 1f))
                 }
             }
+            // Validate the downloaded/cached file so a corrupt GGUF is caught
+            // here (and deleted) rather than crashing inference later.
+            LocalLlmEngine.validateModelFile(file)
             onProgress(1f)
             return file
         } catch (t: Throwable) {

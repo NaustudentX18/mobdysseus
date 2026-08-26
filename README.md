@@ -11,7 +11,7 @@
 <p align="center">
   <a href="https://github.com/NaustudentX18/mobdysseus/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/NaustudentX18/mobdysseus/actions/workflows/ci.yml/badge.svg"></a>
   <img alt="License" src="https://img.shields.io/badge/license-AGPL--3.0--or--later-blue">
-  <img alt="Release" src="https://img.shields.io/badge/release-v0.7.1-2eae6f">
+  <img alt="Release" src="https://img.shields.io/badge/release-v0.8.0-2eae6f">
   <img alt="Android" src="https://img.shields.io/badge/Android-15%20%2F%20SDK%2036-3ddc84?logo=android">
   <img alt="minSdk" src="https://img.shields.io/badge/minSdk-30-green">
 </p>
@@ -47,6 +47,7 @@ bigger remote LLM and MCP tools whenever you want.
 | 🔎 **Research** | Web search (DuckDuckGo Instant Answer) rendered as result cards. |
 | 🛠️ **Cookbook** | Detects your SoC/RAM and recommends the best on-device model for the S25. |
 | 🔌 **MCP Tools** | Add self-hosted [MCP](https://modelcontextprotocol.io) servers, discover tools, invoke them, stream results. |
+| ⭐ **Skills** | A marketplace of installable skills (Ask Your Data, Privacy Verdict, One-Tap Capture, Photo OCR, and more on the roadmap). |
 | ⚙️ **Settings** | Model source (On-device / Cloud API), provider presets, GGUF picker, connection test, About & licenses. |
 
 ## Guides & advice
@@ -108,12 +109,12 @@ Download the latest APK from the **[Releases page](https://github.com/Naustudent
 
 ```bash
 # verify a release APK
-apksigner verify --print-certs Mobdysseus-v0.7.1.apk   # shows CN=Mobdysseus
+apksigner verify --print-certs Mobdysseus-v0.8.0.apk   # shows CN=Mobdysseus
 ```
 
 | Version | Download | SHA-256 |
 |---|---|---|
-| v0.7.1 | [Mobdysseus-v0.7.1.apk](https://github.com/NaustudentX18/mobdysseus/releases/download/v0.7.1/Mobdysseus-v0.7.1.apk) | `b3fba4923efd9f4b1ef3d7a751cb84ec0bd284e4c7a7777f7a42042771b92adc` |
+| v0.8.0 | [Mobdysseus-v0.8.0.apk](https://github.com/NaustudentX18/mobdysseus/releases/download/v0.8.0/Mobdysseus-v0.8.0.apk) | `3797266f35be037e32702f8b9abe31fce3de7cfbaf084da8d11df7508bc33ed4` |
 
 ## Repository layout
 
