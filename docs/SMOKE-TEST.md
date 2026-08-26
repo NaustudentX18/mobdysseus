@@ -1,9 +1,9 @@
 # Mobdysseus — Smoke Test
 
-Install `dist/Mobdysseus-v0.7.0.apk` (signed release) or the debug APK and walk this list on a Samsung Galaxy S25.
+Install `dist/Mobdysseus-v0.7.1.apk` (signed release) or the debug APK and walk this list on a Samsung Galaxy S25.
 
 ## 0. Install & signature
-- [ ] `apksigner verify --print-certs dist/Mobdysseus-v0.7.0.apk` shows `CN=Mobdysseus`.
+- [ ] `apksigner verify --print-certs dist/Mobdysseus-v0.7.1.apk` shows `CN=Mobdysseus`.
 - [ ] SHA-256 matches the recorded value in `dist/`.
 
 ## 1. Launch & navigation
@@ -50,7 +50,7 @@ Install `dist/Mobdysseus-v0.7.0.apk` (signed release) or the debug APK and walk 
 - [ ] Delete a server; list persists.
 
 ## 11. Settings → About
-- [ ] About text: Mobdysseus v0.7.0, AGPL-3.0-or-later, "not affiliated with Odysseus".
+- [ ] About text: Mobdysseus v0.7.1, AGPL-3.0-or-later, "not affiliated with Odysseus".
 
 ## 12. Persistence & battery
 - [ ] Kill + reopen app → all stores (notes/tasks/documents/calendar/memory/servers) persist.

@@ -169,7 +169,7 @@ fun SettingsScreen(config: ProviderConfig, onSave: (ProviderConfig) -> Unit) {
         Text("About", style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(8.dp))
         Text(
-            "Mobdysseus v0.7.0\n" +
+            "Mobdysseus v0.7.1\n" +
                 "A mobile rebuild of the Odysseus self-hosted AI workspace, " +
                 "optimised for Samsung Galaxy S25.\n\n" +
                 "Runs standalone on-device, and can connect to a self-hosted " +

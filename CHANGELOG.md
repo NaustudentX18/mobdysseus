@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.1] — 2025-08-26
+### Added
+- Samsung DeX / multi-window support (`resizeableActivity`).
+- `CHANGELOG.md`.
+### Changed
+- CI: added lint step + optional signed-release step.
+- Fixed Calendar `LocalDate.ofInstant` (API 34) → `atZone().toLocalDate()` so it runs on minSdk 30.
+
 All notable changes. Mobdysseus follows [SemVer](https://semver.org). APKs ship in `dist/`.
 
 ## [0.7.0] — 2025-08-26
