@@ -1,92 +1,92 @@
 <div align="center">
+  <img src="assets/banner.png" alt="Mobdysseus Hero Banner" width="100%" />
 
-<img src="assets/banner.png" alt="Mobdysseus v2 Hero Banner" width="100%" />
+  <br />
 
-# ◢ MOBDYSSEUS v2.0
-### The Sovereign, Offline-First Edge AI Workspace for Android
+  <img src="assets/logo.svg" alt="Mobdysseus Logo" width="110" height="110" />
 
-[![Android](https://img.shields.io/badge/Platform-Android%2015%2B%20(API%2036)-3DDC84?logo=android&logoColor=white)](https://android.com)
-[![Kotlin](https://img.shields.io/badge/Language-Kotlin%202.1-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org)
-[![Compose](https://img.shields.io/badge/UI-Jetpack%20Compose%20Native-4285F4?logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
-[![LiteRT](https://img.shields.io/badge/Engine-LiteRT%20%2F%20Snapdragon%20NPU-FFA800?logo=google&logoColor=white)](https://ai.google.dev/edge/litert)
-[![Security](https://img.shields.io/badge/Security-SQLCipher%20%2B%20Keystore-00F0FF?logo=shield&logoColor=white)](docs/PRIVACY.md)
-[![License](https://img.shields.io/badge/License-AGPL--3.0--or--later-E06C75.svg)](LICENSE)
+  # Mobdysseus v2.0
+  ### Sovereign On-Device AI Workspace & Edge Intelligence Engine for Android
 
-*A completely standalone, zero-compromise reconstruction of the desktop CutiePie Odysseus workspace — engineered specifically for the Samsung Galaxy S25 & modern edge devices.*
+  [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg?style=flat-square)](LICENSE)
+  [![Platform](https://img.shields.io/badge/Platform-Android_15%2B_(API_35%2F36)-green.svg?style=flat-square)](https://developer.android.com)
+  [![Architecture](https://img.shields.io/badge/Architecture-Kotlin_%2B_Compose-purple.svg?style=flat-square)](docs/ARCHITECTURE.md)
+  [![Hardware](https://img.shields.io/badge/Hardware-Snapdragon_8_Elite_%2F_LiteRT-orange.svg?style=flat-square)](docs/ROADMAP.md)
+  [![Encryption](https://img.shields.io/badge/Security-Room_%2B_SQLCipher_v5_%2B_Keystore-red.svg?style=flat-square)](docs/PRIVACY.md)
+  [![Parity](https://img.shields.io/badge/Parity-59%2F59_Desktop_Routes-emerald.svg?style=flat-square)](PARITY.md)
+  [![Contract Tests](https://img.shields.io/badge/Tests-14%2F14_Contract_Suites_Passing-brightgreen.svg?style=flat-square)](tools/)
 
-[Architecture](docs/ARCHITECTURE.md) • [Roadmap](docs/ROADMAP.md) • [Theme Engine](docs/THEMING.md) • [Privacy Manifesto](docs/PRIVACY.md) • [Developer Guide](docs/DEV-GUIDE.md)
-
+  <p align="center">
+    <strong>A 100% native, zero-cloud, hardware-accelerated personal AI computing environment.</strong><br />
+    No WebViews. No remote server dependencies. Zero tracking. Pure local sovereign intelligence.
+  </p>
 </div>
 
 ---
 
-## ⚡ Highlights & Innovations in v2.0
-
-* **Zero-WebView & Zero-Server:** 100% native Kotlin and Jetpack Compose. Functions completely in airplane mode with zero telemetry and zero required external servers or API keys.
-* **Snapdragon 8 Elite NPU Acceleration:** Powered by LiteRT-LM with dynamic thread-affinity scheduling and thermal throttling resilience.
-* **7 Custom OLED Dynamic Themes:** Interactive theme engine featuring *Obsidian Coral*, *Cyberpunk Neon*, *Midnight Navy*, *Solarized Amber*, *Forest Matrix*, *Monokai Vapor*, and *Material You*.
-* **Hardware-Backed Encryption:** All conversations, notes, memories, tasks, and embeddings are stored inside a Room database encrypted via SQLCipher with key material anchored in the Android Keystore.
-* **Sandboxed Capability Broker:** Replaces desktop shell scripts and unrestricted MCP execution with a typed Android capability broker, audit ledger, and explicit user-approval bottom sheets.
-* **Mnemosyne Governed Memory:** Long-term memory extraction with strict human-in-the-loop review queues to prevent prompt injection and memory corruption.
-
----
-
-## 📸 Screenshots & Visual Tour
+## 🌟 Visual Showcase
 
 <div align="center">
-
-| Local AI Chat & Benchmarks | Dynamic Theme Engine |
-|:---:|:---:|
-| <img src="assets/screenshots/01_chat_streaming.png" width="380" alt="Local Chat" /> | <img src="assets/screenshots/02_theme_engine.png" width="380" alt="Theme Engine" /> |
-| **Streaming on-device LLM with token stats** | **7 custom OLED palettes with live previews** |
-
-| Cookbook & Recipe Automation | Governed Brain Memory |
-|:---:|:---:|
-| <img src="assets/screenshots/03_cookbook_recipes.png" width="380" alt="Cookbook Recipes" /> | <img src="assets/screenshots/04_brain_memory.png" width="380" alt="Brain Memory" /> |
-| **Batch workflows & hardware detection** | **Encrypted long-term memory with approval gates** |
-
+  <table>
+    <tr>
+      <td width="50%" align="center">
+        <strong>⚡ Local AI Chat & RAG Citations</strong><br />
+        <img src="docs/screenshots/01_chat_streaming.png" width="100%" alt="Local Chat Streaming" />
+      </td>
+      <td width="50%" align="center">
+        <strong>🎨 Dynamic 7-Theme Color Engine</strong><br />
+        <img src="docs/screenshots/02_theme_engine.png" width="100%" alt="Theme Engine" />
+      </td>
+    </tr>
+    <tr>
+      <td width="50%" align="center">
+        <strong>🍲 Cookbook & Parametric Recipes</strong><br />
+        <img src="docs/screenshots/03_cookbook_recipes.png" width="100%" alt="Cookbook Recipes" />
+      </td>
+      <td width="50%" align="center">
+        <strong>🧠 Mnemosyne Governed Memory Matrix</strong><br />
+        <img src="docs/screenshots/04_brain_memory.png" width="100%" alt="Brain Memory" />
+      </td>
+    </tr>
+  </table>
 </div>
 
 ---
 
 ## 🏛️ System Architecture
 
+Mobdysseus is engineered with strict **unidirectional dependency boundaries** (`shell -> navigation -> feature -> core`) and a hardened zero-trust data pipeline:
+
 ```mermaid
 graph TD
-    subgraph "Android UI Layer (Jetpack Compose)"
-        UI_Nav["Adaptive Navigation Rail / BottomBar"]
-        UI_Screens["Chat | Cookbook | Brain | Notes | Tasks | More"]
-        UI_Theme["Mobdysseus Theme Engine (7 Palettes)"]
+    subgraph UI ["📱 Jetpack Compose UI Shell"]
+        Shell["MainActivity (Theme Provider)"]
+        Nav["Navigation Hub (Bottom Bar / Rail)"]
+        Chat["Chat Screen"]
+        Cookbook["Cookbook Screen"]
+        Brain["Brain & Memory Screen"]
+        Notes["Notes & Tasks"]
+        More["More & Settings (Sampler Knobs)"]
     end
 
-    subgraph "Core Domain & Governance"
-        Core_Mem["Memory Governance (Mnemosyne)"]
-        Core_RAG["LocalLexicalIndex + Vector Citations"]
-        Core_Broker["Capability Broker & Approval Ledger"]
-        Core_Recipe["Recipe Runner & Hardware Profiler"]
+    subgraph Core ["⚙️ Core Intelligence & Domain"]
+        Runtime["LiteRT-LM Engine (GPU/CPU Fallback)"]
+        Broker["Sandboxed Capability Broker"]
+        RAG["BM25 & Semantic Retrieval Engine"]
+        Theme["Theme Engine (7 OLED Palettes)"]
+        Voice["Safe Speech & TTS Engine"]
     end
 
-    subgraph "Local Inference Engine"
-        Eng_Runtime["LocalModelRuntime (LiteRT-LM / GGUF)"]
-        Eng_Service["Foreground Inference Service (START_STICKY)"]
-        Eng_NPU["Qualcomm Hexagon NPU / GPU Acceleration"]
+    subgraph Security ["🔒 Storage & Root of Trust"]
+        Sec_KeyStore["Android Keystore Hardware Key"]
+        Sec_SQLCipher["Room Database v5 + SQLCipher"]
+        Sec_Backup["AES-256-GCM Encrypted Backups"]
     end
 
-    subgraph "Hardware-Anchored Storage"
-        Sec_KeyStore["Android Keystore Vault"]
-        Sec_SQLCipher["SQLCipher Encrypted SQLite (Room v4)"]
-        Sec_SAF["App-Private Scoped Storage (SAF)"]
-    end
-
-    UI_Screens --> Core_Mem
-    UI_Screens --> Core_RAG
-    UI_Screens --> Core_Broker
-    UI_Screens --> Core_Recipe
-    Core_Recipe --> Eng_Runtime
-    Eng_Runtime --> Eng_Service
-    Eng_Service --> Eng_NPU
-    Core_Mem --> Sec_SQLCipher
-    Core_RAG --> Sec_SAF
+    Shell --> Nav
+    Nav --> Chat & Cookbook & Brain & Notes & More
+    Chat & Cookbook & Brain & More --> Runtime & Broker & RAG & Theme & Voice
+    Runtime & Broker & RAG & Theme --> Sec_SQLCipher
     Sec_KeyStore --> Sec_SQLCipher
 ```
 
@@ -94,7 +94,7 @@ graph TD
 
 ## 🎨 Built-in Theme Showcase
 
-Mobdysseus v2 includes a custom theme engine engineered for OLED efficiency and high-contrast accessibility:
+Mobdysseus includes a custom theme engine engineered for OLED efficiency and high-contrast accessibility:
 
 | Theme | Backdrop | Accent | Best Suited For |
 |---|---|---|---|
@@ -129,6 +129,22 @@ Mobdysseus achieves full parity across all **59 desktop route modules** (`app.py
 
 ---
 
+## 🗺️ Master Roadmap & Future Horizons
+
+Track our phased development progress across 7 strategic waves:
+
+* [x] **Phase 1: Foundation & Modular Core (v1.0.0)** — Unidirectional architecture, SQLCipher Room, S25 adaptive UI, offline airplane mode.
+* [x] **Phase 2: Parity, Theming & Sampler Tuning (v2.0.0)** — 7-theme engine, 59 desktop route parity, sampler tuning suite, visual identity overhaul.
+* [ ] **Phase 3: Snapdragon 8 Elite NPU Acceleration (v3.0.0)** — Qualcomm AI Engine Direct (QNN) HTP backend, INT4 quantization, sub-150ms TTFT.
+* [ ] **Phase 4: Edge Multimodal Vision & Audio Intelligence (v3.5.0)** — On-device SmolVLM/PaliGemma 2 vision Q&A, Whisper STT, Piper neural TTS.
+* [ ] **Phase 5: Dense Vector RAG & Semantic Memory Matrix (v4.0.0)** — SQLite-vec dense vector search, Reciprocal Rank Fusion, Mnemosyne graph memory.
+* [ ] **Phase 6: Multi-Agent Swarms & Sandboxed Tool Mesh (v4.5.0)** — GBNF grammar schema enforcement, multi-agent planner/researcher/coder, signed skill packs.
+* [ ] **Phase 7: Decentralized Mesh & Multi-Device Ecosystem (v5.0.0+)** — Wi-Fi Aware & Tailscale P2P mesh, Samsung DeX desktop mode, Wear OS companion.
+
+*For the complete granular ticket backlog with checkboxes, see [docs/ROADMAP.md](docs/ROADMAP.md) and [SWARM_BACKLOG.md](SWARM_BACKLOG.md).*
+
+---
+
 ## 🛠️ Build, Test & Verification
 
 ### Prerequisites
@@ -136,7 +152,7 @@ Mobdysseus achieves full parity across all **59 desktop route modules** (`app.py
 * **Android SDK (compileSdk 36, minSdk 30)**
 * **Python 3.10+ (for contract testing)**
 
-### 1. Run Contract & Boundary Tests (Local Pi / CI)
+### 1. Run Contract & Boundary Tests (Local Host / CI)
 ```bash
 # Verify 100% dependency boundaries across all Kotlin files
 python3 tools/check_dependency_boundaries.py
