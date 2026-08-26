@@ -29,7 +29,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -49,11 +48,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jakemalby.odysseusmobile.core.Workspace
 import com.jakemalby.odysseusmobile.core.seedWorkspace
+import com.jakemalby.odysseusmobile.core.theme.AppTheme
 import com.jakemalby.odysseusmobile.navigation.Destination
 import com.jakemalby.odysseusmobile.persistence.WorkspacePersistenceController
 import com.jakemalby.odysseusmobile.platform.task.AndroidTaskReminderScheduler
 import com.jakemalby.odysseusmobile.ui.AdaptiveNavigation
 import com.jakemalby.odysseusmobile.ui.MobdysseusAdaptiveNavigation
+import com.jakemalby.odysseusmobile.ui.MobdysseusAppTheme
+import com.jakemalby.odysseusmobile.ui.MobdysseusThemeColors
 import com.jakemalby.odysseusmobile.ui.adaptiveNavigationFor
 import com.jakemalby.odysseusmobile.ui.mobdysseusImeSafe
 
@@ -73,7 +75,6 @@ internal val Coral = Color(0xFFE06C75)
 internal val Ink = Color(0xFFE7E9F0)
 internal val Muted = Color(0xFFABB1C0)
 internal val Success = Color(0xFF7BC99A)
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,21 +100,23 @@ private fun MobdysseusApp() {
         workspace = changed
         persistence.enqueueSave(changed)
     }
-    val colors = darkColorScheme(primary = Coral, onPrimary = Obsidian, background = Obsidian, onBackground = Ink, surface = Panel, onSurface = Ink, surfaceVariant = PanelRaised, onSurfaceVariant = Muted, outline = Border)
 
-    MaterialTheme(colorScheme = colors) {
+    val activeTheme = AppTheme.fromId(workspace?.settings?.theme)
+
+    MobdysseusAppTheme(theme = activeTheme) {
+        val colors = MobdysseusThemeColors.current
         val current = workspace
         if (current == null) {
-            Surface(color = Obsidian, modifier = Modifier.fillMaxSize()) {
+            Surface(color = colors.background, modifier = Modifier.fillMaxSize()) {
                 Box(Modifier.fillMaxSize().padding(28.dp), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                        Text("MOBDYSSEUS", color = Coral, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                        Text("MOBDYSSEUS", color = colors.primary, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                         val failure = loadFailure
                         if (failure == null) {
-                            Text("Opening encrypted workspace…", color = Muted)
+                            Text("Opening encrypted workspace…", color = colors.onSurfaceVariant)
                         } else {
-                            Text("The encrypted workspace could not be opened.", color = Ink)
-                            Text(failure.message ?: "Unknown storage error", color = Coral, fontSize = 12.sp)
+                            Text("The encrypted workspace could not be opened.", color = colors.onBackground)
+                            Text(failure.message ?: "Unknown storage error", color = colors.primary, fontSize = 12.sp)
                             Button(onClick = { loadAttempt += 1 }) { Text("Retry") }
                         }
                     }
@@ -124,9 +127,25 @@ private fun MobdysseusApp() {
             val useRail = adaptiveNavigationFor(widthDp) == AdaptiveNavigation.NAVIGATION_RAIL
             val topBar: @Composable () -> Unit = {
                 TopAppBar(
-                    title = { Row(verticalAlignment = Alignment.CenterVertically) { Text("◢", color = Coral, fontSize = 26.sp, fontWeight = FontWeight.Bold); Text(" MOBDYSSEUS", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, letterSpacing = 1.sp) } },
-                    actions = { Text(if (saveFailure != null) "SAVE ERROR" else if (current.settings.localOnly) "LOCAL" else "HYBRID", color = Coral, fontSize = 11.sp, fontFamily = FontFamily.Monospace, modifier = Modifier.padding(end = 18.dp)) },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Obsidian, titleContentColor = Ink),
+                    title = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("◢", color = colors.primary, fontSize = 26.sp, fontWeight = FontWeight.Bold)
+                            Text(" MOBDYSSEUS", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                        }
+                    },
+                    actions = {
+                        Text(
+                            if (saveFailure != null) "SAVE ERROR" else if (current.settings.localOnly) "LOCAL" else "HYBRID",
+                            color = colors.primary,
+                            fontSize = 11.sp,
+                            fontFamily = FontFamily.Monospace,
+                            modifier = Modifier.padding(end = 18.dp),
+                        )
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = colors.background,
+                        titleContentColor = colors.onBackground,
+                    ),
                 )
             }
             val content: @Composable (androidx.compose.foundation.layout.PaddingValues) -> Unit = { padding ->
@@ -146,7 +165,7 @@ private fun MobdysseusApp() {
                 }
             }
             if (useRail) {
-                Scaffold(containerColor = Obsidian, topBar = topBar) { padding ->
+                Scaffold(containerColor = colors.background, topBar = topBar) { padding ->
                     Row(Modifier.fillMaxSize()) {
                         MobdysseusAdaptiveNavigation(destination, { destination = it }, Modifier.fillMaxHeight())
                         Box(Modifier.weight(1f)) { content(padding) }
@@ -154,7 +173,7 @@ private fun MobdysseusApp() {
                 }
             } else {
                 Scaffold(
-                    containerColor = Obsidian,
+                    containerColor = colors.background,
                     topBar = topBar,
                     bottomBar = { MobdysseusAdaptiveNavigation(destination, { destination = it }) },
                 ) { padding -> content(padding) }
@@ -164,6 +183,23 @@ private fun MobdysseusApp() {
 }
 
 @Composable
-internal fun SimpleRow(text: String, onDelete: () -> Unit) { Card(colors = CardDefaults.cardColors(containerColor = Panel), border = BorderStroke(1.dp, Border)) { Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 5.dp, top = 7.dp, bottom = 7.dp), verticalAlignment = Alignment.CenterVertically) { Text(text, Modifier.weight(1f)); IconButton(onClick = onDelete) { Icon(Icons.Outlined.Delete, "Delete", tint = Muted) } } } }
+internal fun SimpleRow(text: String, onDelete: () -> Unit) {
+    val colors = MobdysseusThemeColors.current
+    Card(colors = CardDefaults.cardColors(containerColor = colors.surface), border = BorderStroke(1.dp, colors.border)) {
+        Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 5.dp, top = 7.dp, bottom = 7.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(text, Modifier.weight(1f), color = colors.onSurface)
+            IconButton(onClick = onDelete) { Icon(Icons.Outlined.Delete, "Delete", tint = colors.onSurfaceVariant) }
+        }
+    }
+}
+
 @Composable
-internal fun EmptyCard(title: String, detail: String) { Surface(color = Panel, shape = RoundedCornerShape(20.dp), border = BorderStroke(1.dp, Border)) { Column(Modifier.padding(20.dp)) { Text(title, fontWeight = FontWeight.Bold); Text(detail, color = Muted, modifier = Modifier.padding(top = 5.dp)) } } }
+internal fun EmptyCard(title: String, detail: String) {
+    val colors = MobdysseusThemeColors.current
+    Surface(color = colors.surface, shape = RoundedCornerShape(20.dp), border = BorderStroke(1.dp, colors.border)) {
+        Column(Modifier.padding(20.dp)) {
+            Text(title, fontWeight = FontWeight.Bold, color = colors.onSurface)
+            Text(detail, color = colors.onSurfaceVariant, modifier = Modifier.padding(top = 5.dp))
+        }
+    }
+}

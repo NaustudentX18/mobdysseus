@@ -12,7 +12,7 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 
 @Database(
     entities = [WorkspaceEntity::class, ConversationEntity::class, ChatMessageEntity::class, NoteEntity::class, TaskEntity::class, MemoryEntity::class, GalleryEntity::class],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 internal abstract class MobdysseusDatabase : RoomDatabase() {
@@ -29,12 +29,18 @@ internal abstract class MobdysseusDatabase : RoomDatabase() {
             )
             return Room.databaseBuilder(appContext, MobdysseusDatabase::class.java, DATABASE_NAME)
                 .openHelperFactory(SupportOpenHelperFactory(passphrase, null, true))
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                 .build()
         }
 
         private fun loadSqlCipher() {
             sqlCipherLoaded
+        }
+
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE workspace ADD COLUMN theme TEXT NOT NULL DEFAULT 'OBSIDIAN_CORAL'")
+            }
         }
 
         private val MIGRATION_2_3 = object : Migration(2, 3) {

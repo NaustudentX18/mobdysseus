@@ -22,7 +22,12 @@ data class Task(
 )
 data class Memory(val id: String, val text: String, val createdAt: Long)
 data class GalleryItem(val id: String, val name: String, val path: String, val createdAt: Long)
-data class MobileSettings(val selectedRecipe: String = "Private quick chat", val localOnly: Boolean = true, val compactDensity: Boolean = false)
+data class MobileSettings(
+    val selectedRecipe: String = "Private quick chat",
+    val localOnly: Boolean = true,
+    val compactDensity: Boolean = false,
+    val theme: String = "OBSIDIAN_CORAL",
+)
 data class Workspace(
     val conversations: List<Conversation>,
     val activeConversationId: String,

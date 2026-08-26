@@ -14,7 +14,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,9 +26,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.AlertDialog
@@ -50,8 +55,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
@@ -64,6 +71,7 @@ import com.jakemalby.odysseusmobile.core.Workspace
 import com.jakemalby.odysseusmobile.core.WorkspaceStore
 import com.jakemalby.odysseusmobile.core.EncryptedBackupCodec
 import com.jakemalby.odysseusmobile.core.image.ImageEditRecipe
+import com.jakemalby.odysseusmobile.core.theme.AppTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -209,7 +217,29 @@ internal fun MoreScreen(workspace: Workspace, update: ((Workspace) -> Workspace)
     LazyColumn(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item { Text("More", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold); Text("Native controls and mobile equivalents for the rest of Mobdysseus.", color = Muted, modifier = Modifier.padding(top = 4.dp)) }
         item {
-            Card(colors = CardDefaults.cardColors(containerColor = Panel), border = BorderStroke(1.dp, Border)) { Column(Modifier.padding(18.dp)) { Row(verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Outlined.Settings, null, tint = Coral); Text("Privacy & runtime", fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 10.dp)) }; SettingToggle("Local-only mode", "No server connection is required for the native workspace.", workspace.settings.localOnly) { checked -> update { it.copy(settings = it.settings.copy(localOnly = checked)) } }; HorizontalDivider(Modifier.padding(vertical = 8.dp), color = Border); SettingToggle("Compact density", "More workspace content on the S25 display.", workspace.settings.compactDensity) { checked -> update { it.copy(settings = it.settings.copy(compactDensity = checked)) } } } }
+            Card(colors = CardDefaults.cardColors(containerColor = Panel), border = BorderStroke(1.dp, Border)) {
+                Column(Modifier.padding(18.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Outlined.Settings, null, tint = Coral)
+                        Text("Privacy & runtime", fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 10.dp))
+                    }
+                    SettingToggle("Local-only mode", "No server connection is required for the native workspace.", workspace.settings.localOnly) { checked ->
+                        update { it.copy(settings = it.settings.copy(localOnly = checked)) }
+                    }
+                    HorizontalDivider(Modifier.padding(vertical = 8.dp), color = Border)
+                    SettingToggle("Compact density", "More workspace content on the S25 display.", workspace.settings.compactDensity) { checked ->
+                        update { it.copy(settings = it.settings.copy(compactDensity = checked)) }
+                    }
+                }
+            }
+        }
+        item {
+            ThemeSelectorCard(
+                currentThemeId = workspace.settings.theme,
+                onThemeSelected = { chosen ->
+                    update { it.copy(settings = it.settings.copy(theme = chosen.id)) }
+                }
+            )
         }
         item { DiagnosticsPanel(workspace) }
         item { ProviderPanel(localOnly = workspace.settings.localOnly) }
@@ -312,6 +342,70 @@ internal fun MoreScreen(workspace: Workspace, update: ((Workspace) -> Workspace)
             }
         }
         item { OutlinedButton(onClick = { pendingReset = true }, modifier = Modifier.fillMaxWidth()) { Text("Reset local workspace", color = Coral) } }
+    }
+}
+
+@Composable
+private fun ThemeSelectorCard(currentThemeId: String, onThemeSelected: (AppTheme) -> Unit) {
+    val activeTheme = AppTheme.fromId(currentThemeId)
+    Card(colors = CardDefaults.cardColors(containerColor = Panel), border = BorderStroke(1.dp, Border)) {
+        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Outlined.Palette, null, tint = Coral)
+                Column(Modifier.padding(start = 10.dp).weight(1f)) {
+                    Text("Workspace Theme", fontWeight = FontWeight.Bold)
+                    Text("Customize workspace color palette and visual styling.", color = Muted, fontSize = 12.sp)
+                }
+                Surface(
+                    color = Color(activeTheme.primaryHex).copy(alpha = 0.2f),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, Color(activeTheme.primaryHex)),
+                ) {
+                    Text(
+                        activeTheme.displayName,
+                        color = Color(activeTheme.primaryHex),
+                        fontSize = 11.sp,
+                        fontFamily = FontFamily.Monospace,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    )
+                }
+            }
+            HorizontalDivider(color = Border)
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                AppTheme.entries.forEach { theme ->
+                    val isSelected = theme == activeTheme
+                    Surface(
+                        color = if (isSelected) PanelRaised else Color.Transparent,
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, if (isSelected) Color(theme.primaryHex) else Border.copy(alpha = 0.5f)),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { onThemeSelected(theme) },
+                    ) {
+                        Row(
+                            Modifier.padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            Box(
+                                Modifier
+                                    .size(24.dp)
+                                    .background(Color(theme.backgroundHex), CircleShape)
+                                    .border(2.dp, Color(theme.primaryHex), CircleShape)
+                            )
+                            Column(Modifier.weight(1f)) {
+                                Text(theme.displayName, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal, color = Ink)
+                                Text(theme.description, color = Muted, fontSize = 11.sp)
+                            }
+                            if (isSelected) {
+                                Text("ACTIVE", color = Color(theme.primaryHex), fontSize = 10.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

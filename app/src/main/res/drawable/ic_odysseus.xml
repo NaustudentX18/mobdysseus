@@ -1,10 +1,47 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="48dp"
-    android:height="48dp"
-    android:viewportWidth="48"
-    android:viewportHeight="48">
-    <path android:fillColor="#111318" android:pathData="M0,0h48v48h-48z"/>
-    <path android:fillColor="#E06C75" android:pathData="M24,7L24,31L8,31Z"/>
-    <path android:fillColor="#99E06C75" android:pathData="M24,13L24,31L39,31Z"/>
-    <path android:strokeColor="#E06C75" android:strokeWidth="3" android:strokeLineCap="round" android:fillColor="#00000000" android:pathData="M7,36Q16,29 24,36Q32,42 41,36"/>
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Dark Obsidian Background Tile -->
+    <path
+        android:fillColor="#111318"
+        android:pathData="M0,0h108v108h-108z"/>
+    
+    <!-- Outer Shield Contour -->
+    <path
+        android:fillColor="#1B1E26"
+        android:strokeColor="#343946"
+        android:strokeWidth="1.5"
+        android:pathData="M54,18 L78,33 L78,65 L54,90 L30,65 L30,33 Z"/>
+    
+    <!-- Cyberpunk Facet Shards -->
+    <path
+        android:fillColor="#252A36"
+        android:pathData="M54,18 L54,54 L78,33 Z"/>
+    <path
+        android:fillColor="#171A22"
+        android:pathData="M54,18 L54,54 L30,33 Z"/>
+    <path
+        android:fillColor="#1E222C"
+        android:pathData="M30,65 L54,54 L54,90 Z"/>
+    <path
+        android:fillColor="#2B3140"
+        android:pathData="M78,65 L54,54 L54,90 Z"/>
+
+    <!-- Glowing Odysseus Crest (Lambda Apex) -->
+    <path
+        android:fillColor="#E06C75"
+        android:pathData="M54,26 L70,58 L63,58 L54,39 L45,58 L38,58 Z"/>
+
+    <!-- Quantum Neural Core (Diamond) -->
+    <path
+        android:fillColor="#00F0FF"
+        android:pathData="M54,45 L62,54 L54,63 L46,54 Z"/>
+        
+    <!-- Neon Center Node -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,52 A2,2 0 1,1 54,56 A2,2 0 1,1 54,52"/>
 </vector>

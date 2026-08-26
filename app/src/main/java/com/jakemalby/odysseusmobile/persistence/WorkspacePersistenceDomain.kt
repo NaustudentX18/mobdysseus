@@ -49,6 +49,7 @@ data class WorkspaceSettingsRecord(
     val selectedRecipe: String,
     val localOnly: Boolean,
     val compactDensity: Boolean,
+    val theme: String = "OBSIDIAN_CORAL",
 )
 
 /** Room, encrypted SQL, or another app-private store must implement this API. */

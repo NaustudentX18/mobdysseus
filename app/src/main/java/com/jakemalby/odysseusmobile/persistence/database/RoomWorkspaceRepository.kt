@@ -34,11 +34,11 @@ class RoomWorkspaceRepository internal constructor(
             schemaVersion = workspace.schemaVersion,
             activeConversationId = workspace.activeConversationId,
             conversations = conversations,
-            notes = dao.notes().map { NoteRecord(it.id, it.title, it.body, it.updatedAt) },
-            tasks = dao.tasks().map { TaskRecord(it.id, it.title, it.done) },
+            notes = dao.notes().map { NoteRecord(it.id, it.title, it.body, it.updatedAt, it.tags) },
+            tasks = dao.tasks().map { TaskRecord(it.id, it.title, it.done, it.dueAt, it.recurrence, it.remindBeforeMillis) },
             memories = dao.memories().map { MemoryRecord(it.id, it.text, it.createdAt) },
             gallery = dao.gallery().map { GalleryRecord(it.id, it.name, it.privatePath, it.createdAt) },
-            settings = WorkspaceSettingsRecord(workspace.selectedRecipe, workspace.localOnly, workspace.compactDensity),
+            settings = WorkspaceSettingsRecord(workspace.selectedRecipe, workspace.localOnly, workspace.compactDensity, workspace.theme),
         )
     }
 
@@ -52,6 +52,7 @@ class RoomWorkspaceRepository internal constructor(
             selectedRecipe = snapshot.settings.selectedRecipe,
             localOnly = snapshot.settings.localOnly,
             compactDensity = snapshot.settings.compactDensity,
+            theme = snapshot.settings.theme,
         ))
         dao.insertConversations(snapshot.conversations.mapIndexed { order, value ->
             ConversationEntity(value.id, title = value.title, sortOrder = order)
@@ -61,8 +62,8 @@ class RoomWorkspaceRepository internal constructor(
                 ChatMessageEntity(value.id, conversation.id, value.author, value.text, value.mine, value.createdAt, order)
             }
         })
-        dao.insertNotes(snapshot.notes.mapIndexed { order, value -> NoteEntity(value.id, title = value.title, body = value.body, updatedAt = value.updatedAt, sortOrder = order) })
-        dao.insertTasks(snapshot.tasks.mapIndexed { order, value -> TaskEntity(value.id, title = value.title, done = value.done, sortOrder = order) })
+        dao.insertNotes(snapshot.notes.mapIndexed { order, value -> NoteEntity(value.id, title = value.title, body = value.body, updatedAt = value.updatedAt, tags = value.tags, sortOrder = order) })
+        dao.insertTasks(snapshot.tasks.mapIndexed { order, value -> TaskEntity(value.id, title = value.title, done = value.done, dueAt = value.dueAt, recurrence = value.recurrence, remindBeforeMillis = value.remindBeforeMillis, sortOrder = order) })
         dao.insertMemories(snapshot.memories.mapIndexed { order, value -> MemoryEntity(value.id, text = value.text, createdAt = value.createdAt, sortOrder = order) })
         dao.insertGallery(snapshot.gallery.mapIndexed { order, value -> GalleryEntity(value.id, name = value.name, privatePath = value.privatePath, createdAt = value.createdAt, sortOrder = order) })
     }

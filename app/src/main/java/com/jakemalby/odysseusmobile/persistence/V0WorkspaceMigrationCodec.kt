@@ -71,6 +71,7 @@ object V0WorkspaceMigrationCodec : LegacyWorkspaceMigrator {
         selectedRecipe = value.requiredString("recipe"),
         localOnly = value.requiredBoolean("localOnly"),
         compactDensity = value.requiredBoolean("compact"),
+        theme = value.optString("theme", "OBSIDIAN_CORAL").ifBlank { "OBSIDIAN_CORAL" },
     )
 
     private fun JSONObject.requiredString(name: String): String = getString(name).also {

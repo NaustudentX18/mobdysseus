@@ -13,6 +13,7 @@ internal data class WorkspaceEntity(
     val selectedRecipe: String,
     val localOnly: Boolean,
     val compactDensity: Boolean,
+    val theme: String = "OBSIDIAN_CORAL",
 ) {
     companion object { const val SINGLETON_ID = 1 }
 }

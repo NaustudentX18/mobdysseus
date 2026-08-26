@@ -22,6 +22,7 @@ object CoreWorkspaceMapper {
             selectedRecipe = workspace.settings.selectedRecipe,
             localOnly = workspace.settings.localOnly,
             compactDensity = workspace.settings.compactDensity,
+            theme = workspace.settings.theme,
         ),
     )
 
@@ -43,6 +44,7 @@ object CoreWorkspaceMapper {
             selectedRecipe = snapshot.settings.selectedRecipe,
             localOnly = snapshot.settings.localOnly,
             compactDensity = snapshot.settings.compactDensity,
+            theme = snapshot.settings.theme,
         ),
     )
 
@@ -64,7 +66,14 @@ object CoreWorkspaceMapper {
         id = value.id, author = value.author, text = value.text, mine = value.mine, createdAt = value.createdAt,
     )
     private fun note(value: NoteRecord) = Note(value.id, value.title, value.body, value.updatedAt, value.tags.split(",").filter { it.isNotBlank() })
-    private fun task(value: TaskRecord) = Task(value.id, value.title, value.done, value.dueAt, com.jakemalby.odysseusmobile.core.task.TaskRecurrence.valueOf(value.recurrence), value.remindBeforeMillis)
+    private fun task(value: TaskRecord) = Task(
+        value.id,
+        value.title,
+        value.done,
+        value.dueAt,
+        runCatching { com.jakemalby.odysseusmobile.core.task.TaskRecurrence.valueOf(value.recurrence) }.getOrDefault(com.jakemalby.odysseusmobile.core.task.TaskRecurrence.NONE),
+        value.remindBeforeMillis,
+    )
     private fun memory(value: MemoryRecord) = Memory(value.id, value.text, value.createdAt)
     private fun gallery(value: GalleryRecord) = GalleryItem(value.id, value.name, value.privatePath, value.createdAt)
 }
