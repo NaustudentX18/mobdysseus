@@ -9,6 +9,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      KEYSTORE_B64: ${{ secrets.MOBDYSSEUS_KEYSTORE_BASE64 }}
+      MOBDYSSEUS_KEYSTORE_PASS: ${{ secrets.MOBDYSSEUS_KEYSTORE_PASS }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,25 +37,22 @@ jobs:
       - name: Build debug APK
         run: ./gradlew :app:assembleDebug --console=plain
 
-      - name: Upload APK
+      - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
           name: mobdysseus-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
 
-      # Signed release build. Only runs when a MOBDYSSEUS_KEYSTORE_BASE64 secret is
-      # configured (repo keystore is gitignored). Skips gracefully otherwise.
+      # Signed release build. Secrets are mapped to job-level env (the only place
+      # secrets may be referenced). The step runs only when the keystore secret is set.
       - name: Build signed release APK
-        if: ${{ secrets.MOBDYSSEUS_KEYSTORE_BASE64 != '' }}
-        env:
-          KEYSTORE_B64: ${{ secrets.MOBDYSSEUS_KEYSTORE_BASE64 }}
-          MOBDYSSEUS_KEYSTORE_PASS: ${{ secrets.MOBDYSSEUS_KEYSTORE_PASS }}
+        if: ${{ env.KEYSTORE_B64 != '' }}
         run: |
           echo "$KEYSTORE_B64" | base64 -d > release.keystore
           ./gradlew :app:assembleRelease --console=plain
 
       - name: Upload signed release APK
-        if: ${{ secrets.MOBDYSSEUS_KEYSTORE_BASE64 != '' }}
+        if: ${{ env.KEYSTORE_B64 != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: mobdysseus-release-apk
