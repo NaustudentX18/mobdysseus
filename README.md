@@ -76,6 +76,19 @@ On-device inference runs inside a **foreground service** with a partial wakelock
 model can finish generating without the system killing it, and is `START_STICKY` for
 restart resilience on One UI. Long jobs are best run while plugged in.
 
+## Roadmap
+
+Every item targets a **gap the market leaves open** — see [docs/ROADMAP.md](docs/ROADMAP.md) for the full detail and rationale.
+
+| Phase | Theme | Flagship feature | The gap it fills |
+|---|---|---|---|
+| **0 · Data plane** | On-device retrieval + provable privacy | **Ask Your Data** (RAG over all your notes/docs/photos), **Privacy Verdict** (audit trail), One-Tap Capture, offline OCR | Cloud search can't see local files; "no cloud" is currently unprovable. |
+| **1 · Memory plane** | A durable, browsable model of *you* | **Mnemosyne** knowledge graph, Context Docks, Private Inbox, **self-hosted sync (Pi)** | Cloud memory is an opaque black box; local-first tools are desktop-only. |
+| **2 · MCP trust & agents** | Safe, agentic on-device tool use | **Phone-as-MCP-server** (consent-gated), permission gate, trust check, agent loops, MCP app store | MCP is desktop/CLI + security-shallow; tool-poisoning is its #1 open problem. |
+| **3 · Galaxy S25-native** | Lean into One UI surfaces | **Private voice assistant**, live widgets / Edge panel, DeX panes, health copilot, offline translation | Galaxy AI is cloud-bound + quota-limited; generic AI apps ignore One UI. |
+
+> **North star:** a personal, verifiable, fully offline AI data plane on the Galaxy S25 — with an optional user-owned server tier for power and a trust-first MCP gateway.
+
 ## Build from source
 
 Requires JDK 17, the Android SDK (compileSdk 36, minSdk 30), AGP 8.11.1 + Gradle 8.14 (wrapper included).
