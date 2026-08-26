@@ -1,7 +1,7 @@
 # About / Open Source Licenses — screen text
 
 Copy the block below verbatim into the in-app "About / Open Source Licenses"
-screen. Replace `[PUBLIC_SOURCE_REPO_URL]` with the real public repository URL
+screen. Replace `https://github.com/NaustudentX18/mobdysseus` with the real public repository URL
 before release.
 
 ---
@@ -13,7 +13,7 @@ more.
 
 Licensed AGPL-3.0-or-later.
 
-Source code: [PUBLIC_SOURCE_REPO_URL]
+Source code: https://github.com/NaustudentX18/mobdysseus
 
 Third-party libraries:
 

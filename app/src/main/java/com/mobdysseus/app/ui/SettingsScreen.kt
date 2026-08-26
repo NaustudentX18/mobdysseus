@@ -174,9 +174,9 @@ fun SettingsScreen(config: ProviderConfig, onSave: (ProviderConfig) -> Unit) {
                 "optimised for Samsung Galaxy S25.\n\n" +
                 "Runs standalone on-device, and can connect to a self-hosted " +
                 "server for local LLMs and MCP tools.\n\n" +
-                "Licensed AGPL-3.0-or-later. See THIRD_PARTY_NOTICES.md for " +
-                "attributions. This is a community build and is not affiliated " +
-                "with the upstream Odysseus project.",
+                "Licensed AGPL-3.0-or-later. This is a community build and is not " +
+                "affiliated with the upstream Odysseus project.\n\n" +
+                "Source: github.com/NaustudentX18/mobdysseus",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

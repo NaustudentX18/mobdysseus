@@ -1,50 +1,131 @@
-# Mobdysseus
+<p align="center">
+  <img src="assets/logo.png" alt="Mobdysseus" width="560">
+</p>
 
-**A mobile, standalone-first rebuild of the [Odysseus](https://github.com/odysseus-dev/odysseus) self-hosted AI workspace, designed and optimised for Samsung Galaxy S25.**
+<p align="center">
+  <b>Your AI workspace — on-device.</b><br>
+  Notes, tasks, calendar, memory, gallery, research, on-device LLM chat and MCP tools.
+  Built and tuned for the <b>Samsung Galaxy S25</b>.
+</p>
 
-Mobdysseus runs fully on-device out of the box — notes, tasks, documents, calendar, memory, photo gallery, an AI chat powered by an on-device LLM (llama.cpp GGUF), and a cookbook that picks the right model for your hardware. It can also connect to a self-hosted server for a remote LLM and to [MCP](https://modelcontextprotocol.io) servers to reach external tools. No account, no cloud, no account, no telemetry.
+<p align="center">
+  <a href="https://github.com/NaustudentX18/mobdysseus/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/NaustudentX18/mobdysseus/actions/workflows/ci.yml/badge.svg"></a>
+  <img alt="License" src="https://img.shields.io/badge/license-AGPL--3.0--or--later-blue">
+  <img alt="Release" src="https://img.shields.io/badge/release-v0.7.1-2eae6f">
+  <img alt="Android" src="https://img.shields.io/badge/Android-15%20%2F%20SDK%2036-3ddc84?logo=android">
+  <img alt="minSdk" src="https://img.shields.io/badge/minSdk-30-green">
+</p>
 
-## Screens / features
+<p align="center"><i>A community rebuild of the <a href="https://github.com/odysseus-dev/odysseus">Odysseus</a> self-hosted AI workspace — not affiliated with the upstream project.</i></p>
 
-| Area | What it does |
+---
+
+## Screens
+
+<p align="center">
+  <img src="assets/screenshots/screenshot-chat.png" width="150" alt="Chat">
+  <img src="assets/screenshots/screenshot-notes.png" width="150" alt="Notes">
+  <img src="assets/screenshots/screenshot-calendar.png" width="150" alt="Calendar">
+  <img src="assets/screenshots/screenshot-cookbook.png" width="150" alt="Cookbook">
+  <img src="assets/screenshots/screenshot-mcp.png" width="150" alt="MCP Tools">
+  <img src="assets/screenshots/screenshot-settings.png" width="150" alt="Settings">
+</p>
+
+**Standalone-first.** No account, no cloud, no telemetry — your data stays on your phone.
+Everything works offline out of the box, and you can opt-in to a self-hosted server for a
+bigger remote LLM and MCP tools whenever you want.
+
+## Features
+
+| | |
 |---|---|
-| Chat | Streaming chat over OpenAI-compatible endpoints *and* on-device GGUF (llama.cpp via [llmedge](https://github.com/aatricks/llmedge)); markdown rendering; conversation history. |
-| Notes / Tasks / Documents | Plain, offline JSON-backed stores (mirror `data/NotesStore.kt`). |
-| Calendar | Month grid, events, add/edit/delete (offline). |
-| Memory | Free-form knowledge entries with full-text search. |
-| Gallery | Device photo grid + full-screen viewer (`MediaStore`). |
-| Research | Web search (DuckDuckGo Instant Answer) rendered as cards. |
-| Cookbook | Hardware detection + model recommendation tuned for Galaxy S25. |
-| MCP Tools | Add self-hosted MCP servers, discover tools, invoke them, stream results. |
-| Settings | Model source (On-device / Cloud API), provider presets, on-device GGUF picker, test connection, About/licenses. |
+| 💬 **Chat** | Streaming chat over any OpenAI-compatible endpoint *and* a fully on-device GGUF model (llama.cpp via [llmedge](https://github.com/aatricks/llmedge)). Markdown rendering, conversation history, multi-turn context. |
+| 📝 **Notes · Tasks · Documents** | Plain offline, JSON-backed stores. Your data is a file, easy to back up. |
+| 📅 **Calendar** | Month grid, events, add/edit/delete — completely offline. |
+| 🧠 **Memory** | Free-form knowledge entries with full-text search. |
+| 🖼️ **Gallery** | Your device photos in a grid with a full-screen viewer. |
+| 🔎 **Research** | Web search (DuckDuckGo Instant Answer) rendered as result cards. |
+| 🛠️ **Cookbook** | Detects your SoC/RAM and recommends the best on-device model for the S25. |
+| 🔌 **MCP Tools** | Add self-hosted [MCP](https://modelcontextprotocol.io) servers, discover tools, invoke them, stream results. |
+| ⚙️ **Settings** | Model source (On-device / Cloud API), provider presets, GGUF picker, connection test, About & licenses. |
 
-## Architecture
+## Guides & advice
 
-- **On-device first.** No mandatory server. The default LLM is a local GGUF (3B–4B Q4) run via `llmedge`; everything else is local JSON persistence.
-- **Connect when you want.** Point Settings at any OpenAI-compatible endpoint, or add MCP servers, to pull in remote LLMs and tools.
-- **Modules** live under `app/src/main/java/com/mobdysseus/app/`: `data` (stores), `ui` (screens), `provider` (remote LLM), `local` (on-device inference), `mcp` (client), `service` (foreground inference service), `cookbook` (model ranking), `research`.
+### Quick start
+1. Install `dist/Mobdysseus-*.apk` (side-load — see [Install](#install--signing)).
+2. Open the drawer and start with **Chat** or **Notes**. Everything works offline.
+3. Want a smarter model? Open **Settings → On-device** and pick a larger GGUF (first message downloads it once, then it's cached).
 
-## Build
+### On-device model advice (Galaxy S25)
+The S25's Snapdragon 8 Elite (12 GB RAM) comfortably runs **3B–4B Q4** models in real time.
+Start with **Qwen 2.5 3B Q4** for the best quality/speed balance. For the fastest experience
+pick **Qwen 2.5 1.5B Q4**; for maximum quality choose **Llama 3.2 3B Q4**. The **Cookbook**
+tab ranks these for your exact device.
+
+### Connect a server (optional)
+- **Remote LLM** — Settings → Cloud API → pick a preset (Ollama, DeepSeek, OpenAI, custom) and use **Test connection** to verify.
+- **MCP tools** — MCP Tools → **+** → add a server by name + URL (e.g. a self-hosted bridge at `http://192.168.x.x:8101`). Open it to list tools, then **Run** one to stream its output.
+
+### Privacy by design
+Your data stays on-device by default. The app touches the network in only three cases, all
+explicitly user-initiated: a configured **cloud API provider**, a configured **MCP server**,
+and a **model download** from Hugging Face. See [`docs/PRIVACY.md`](docs/PRIVACY.md).
+
+### Battery & background
+On-device inference runs inside a **foreground service** with a partial wakelock, so the
+model can finish generating without the system killing it, and is `START_STICKY` for
+restart resilience on One UI. Long jobs are best run while plugged in.
+
+## Build from source
 
 Requires JDK 17, the Android SDK (compileSdk 36, minSdk 30), AGP 8.11.1 + Gradle 8.14 (wrapper included).
 
 ```bash
 ./gradlew :app:testDebugUnitTest   # unit tests
 ./gradlew :app:assembleDebug       # debug APK
-./gradlew :app:assembleRelease     # signed release APK (release.keystore)
+./gradlew :app:assembleRelease     # signed release APK
 ```
 
-Release signing uses `release.keystore` (alias `mobdysseus`); password defaults to `mobdysseus123` or `MOBDYSSEUS_KEYSTORE_PASS`.
+Release signing uses `release.keystore` (alias `mobdysseus`); the password is read from
+`MOBDYSSEUS_KEYSTORE_PASS` and falls back to `mobdysseus123`.
+
+## Install & signing
+
+Download the latest APK from the **[Releases page](https://github.com/NaustudentX18/mobdysseus/releases)**.
+
+```bash
+# verify a release APK
+apksigner verify --print-certs Mobdysseus-v0.7.1.apk   # shows CN=Mobdysseus
+```
+
+| Version | Download | SHA-256 |
+|---|---|---|
+| v0.7.1 | [Mobdysseus-v0.7.1.apk](https://github.com/NaustudentX18/mobdysseus/releases/download/v0.7.1/Mobdysseus-v0.7.1.apk) | `b3fba4923efd9f4b1ef3d7a751cb84ec0bd284e4c7a7777f7a42042771b92adc` |
+
+## Repository layout
+
+```
+app/src/main/java/com/mobdysseus/app/
+  data/       JSON-backed stores (notes, tasks, docs, calendar, memory, MCP servers)
+  ui/         Compose screens (all tabs)
+  provider/   remote LLM client (OpenAI-compatible + health check)
+  local/      on-device inference (LocalLlmEngine, ModelDownloadManager)
+  mcp/        JSON-RPC/SSE MCP client (McpClient, McpTypes)
+  service/    foreground inference service
+  cookbook/   hardware detection + model ranking
+  research/   DuckDuckGo search client
+docs/         PLAN, ARCHITECTURE, COOKBOOK_SPEC, SMOKE-TEST, HANDOVER, ATTACK-PLAN, PRIVACY, DEV-GUIDE
+scripts/      guard.sh (symlink/temp hygiene), generate_screenshots.py
+assets/       brand logo + screenshots
+```
 
 ## Repo hygiene
 
-- **`scripts/guard.sh`** fails if any symlink / temp-overlay leftover appears in `app/src`, `docs`, or `licenses`. It runs in CI.
-- **`docs/DEV-GUIDE.md`** — the rule that files are created with bash heredocs, never the session `write`/`edit` tools.
-- **`docs/`** — `PLAN.md`, `ARCHITECTURE.md`, `COOKBOOK_SPEC.md`, `SMOKE-TEST.md`, `HANDOVER.md`, `ATTACK-PLAN.md`, `PRIVACY.md`, `DEV-GUIDE.md`.
-- **`THIRD_PARTY_NOTICES.md`** + **`licenses/`** — attribution for llmedge, Compose, ML Kit, and the bundled llama.cpp/ggml, whisper.cpp, bark.cpp.
+- **`scripts/guard.sh`** fails CI if any symlink / temp-overlay leftover appears in source — keeping the tree clean and portable.
+- **`docs/DEV-GUIDE.md`** documents the repo conventions for contributors.
 
 ## License
 
-**AGPL-3.0-or-later.** This is a community build and is **not affiliated with** the upstream Odysseus project. Third-party attributions are in `THIRD_PARTY_NOTICES.md`.
+**AGPL-3.0-or-later.** This is a community build and is **not affiliated with** the upstream Odysseus project. Third-party attributions are in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) (llmedge, Compose, ML Kit, and bundled llama.cpp/ggml, whisper.cpp, bark.cpp).
 
->Your data stays on-device by default. See `docs/PRIVACY.md` for the three explicit cases where the app touches the network (a cloud API provider, an MCP server, or a model download).
+> Built with ❤️ and a great deal of coffee, for the Galaxy S25.
