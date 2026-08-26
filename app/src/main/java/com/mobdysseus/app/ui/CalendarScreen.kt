@@ -124,8 +124,8 @@ fun CalendarScreen(store: CalendarStore) {
 
 private fun isOnDay(event: Event, day: LocalDate): Boolean {
     val zone = ZoneId.systemDefault()
-    val start = LocalDate.ofInstant(Instant.ofEpochMilli(event.startEpochMs), zone)
-    val end = LocalDate.ofInstant(Instant.ofEpochMilli(event.endEpochMs), zone)
+    val start = Instant.ofEpochMilli(event.startEpochMs).atZone(zone).toLocalDate()
+    val end = Instant.ofEpochMilli(event.endEpochMs).atZone(zone).toLocalDate()
     return !day.isBefore(start) && !day.isAfter(end)
 }
 

@@ -27,6 +27,9 @@ jobs:
       - name: Run unit tests
         run: ./gradlew :app:testDebugUnitTest --console=plain
 
+      - name: Lint
+        run: ./gradlew :app:lintDebug --console=plain
+
       - name: Build debug APK
         run: ./gradlew :app:assembleDebug --console=plain
 
@@ -35,3 +38,21 @@ jobs:
         with:
           name: mobdysseus-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+
+      # Signed release build. Only runs when a MOBDYSSEUS_KEYSTORE_BASE64 secret is
+      # configured (repo keystore is gitignored). Skips gracefully otherwise.
+      - name: Build signed release APK
+        if: ${{ secrets.MOBDYSSEUS_KEYSTORE_BASE64 != '' }}
+        env:
+          KEYSTORE_B64: ${{ secrets.MOBDYSSEUS_KEYSTORE_BASE64 }}
+          MOBDYSSEUS_KEYSTORE_PASS: ${{ secrets.MOBDYSSEUS_KEYSTORE_PASS }}
+        run: |
+          echo "$KEYSTORE_B64" | base64 -d > release.keystore
+          ./gradlew :app:assembleRelease --console=plain
+
+      - name: Upload signed release APK
+        if: ${{ secrets.MOBDYSSEUS_KEYSTORE_BASE64 != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobdysseus-release-apk
+          path: app/build/outputs/apk/release/app-release.apk
