@@ -173,11 +173,17 @@ internal class LocalModelRuntime(private val context: Context) : AutoCloseable {
         require(model.delete()) { "Could not remove ${model.name}." }
     }
 
-    suspend fun reply(prompt: String): Result<String> = withContext(Dispatchers.Default) {
+    suspend fun reply(
+        prompt: String,
+        systemInstruction: String = "You are Mobdysseus, a private, concise assistant running entirely on this Android phone.",
+        temperature: Float = 0.7f,
+        topP: Float = 0.9f,
+        topK: Int = 32,
+    ): Result<String> = withContext(Dispatchers.Default) {
         runCatching {
             val model = selectedModel() ?: installedModels().firstOrNull()?.also { selectModel(it).getOrThrow() }
                 ?: error("No local model is installed. In Cookbook, import a .litertlm model into this phone.")
-            if (loadedModel?.absolutePath != model.absolutePath) load(model)
+            if (loadedModel?.absolutePath != model.absolutePath) load(model, systemInstruction, temperature, topP, topK)
             conversation?.sendMessage(Contents.of(prompt))?.contents?.contents
                 ?.filterIsInstance<Content.Text>()
                 ?.joinToString("") { it.text }
@@ -187,11 +193,17 @@ internal class LocalModelRuntime(private val context: Context) : AutoCloseable {
         }
     }
 
-    fun streamReply(prompt: String): Flow<String> = flow {
+    fun streamReply(
+        prompt: String,
+        systemInstruction: String = "You are Mobdysseus, a private, concise assistant running entirely on this Android phone.",
+        temperature: Float = 0.7f,
+        topP: Float = 0.9f,
+        topK: Int = 32,
+    ): Flow<String> = flow {
         val activeConversation = withContext(Dispatchers.Default) {
             val model = selectedModel() ?: installedModels().firstOrNull()?.also { selectModel(it).getOrThrow() }
                 ?: error("No local model is installed. In Cookbook, import a .litertlm model into this phone.")
-            if (loadedModel?.absolutePath != model.absolutePath) load(model)
+            if (loadedModel?.absolutePath != model.absolutePath) load(model, systemInstruction, temperature, topP, topK)
             conversation ?: error("The local conversation could not be created.")
         }
         activeConversation.sendMessageAsync(Contents.of(prompt)).collect { response ->
@@ -202,18 +214,36 @@ internal class LocalModelRuntime(private val context: Context) : AutoCloseable {
         }
     }
 
-    private fun load(model: File) {
+    private fun load(
+        model: File,
+        systemInstruction: String = "You are Mobdysseus, a private, concise assistant running entirely on this Android phone.",
+        temperature: Float = 0.7f,
+        topP: Float = 0.9f,
+        topK: Int = 32,
+    ) {
         close()
-        val newEngine = Engine(EngineConfig(
-            modelPath = model.absolutePath,
-            backend = Backend.GPU(),
-            cacheDir = context.cacheDir.absolutePath,
-        ))
-        newEngine.initialize()
+        val newEngine = runCatching {
+            Engine(EngineConfig(
+                modelPath = model.absolutePath,
+                backend = Backend.GPU(),
+                cacheDir = context.cacheDir.absolutePath,
+            )).apply { initialize() }
+        }.recoverCatching {
+            Engine(EngineConfig(
+                modelPath = model.absolutePath,
+                backend = Backend.CPU(),
+                cacheDir = context.cacheDir.absolutePath,
+            )).apply { initialize() }
+        }.getOrThrow()
+
         engine = newEngine
         conversation = newEngine.createConversation(ConversationConfig(
-            systemInstruction = Contents.of("You are Mobdysseus, a private, concise assistant running entirely on this Android phone."),
-            samplerConfig = SamplerConfig(topK = 32, topP = 0.9, temperature = 0.7),
+            systemInstruction = Contents.of(systemInstruction),
+            samplerConfig = SamplerConfig(
+                topK = topK.coerceIn(1, 128),
+                topP = topP.coerceIn(0.1f, 1.0f),
+                temperature = temperature.coerceIn(0.0f, 2.0f),
+            ),
         ))
         loadedModel = model
     }

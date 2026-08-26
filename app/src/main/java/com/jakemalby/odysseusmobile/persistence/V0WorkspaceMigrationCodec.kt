@@ -72,6 +72,19 @@ object V0WorkspaceMigrationCodec : LegacyWorkspaceMigrator {
         localOnly = value.requiredBoolean("localOnly"),
         compactDensity = value.requiredBoolean("compact"),
         theme = value.optString("theme", "OBSIDIAN_CORAL").ifBlank { "OBSIDIAN_CORAL" },
+        temperature = value.optDouble("temperature", 0.7).toFloat(),
+        topP = value.optDouble("topP", 0.9).toFloat(),
+        topK = value.optInt("topK", 32),
+        maxTokens = value.optInt("maxTokens", 2048),
+        systemPrompt = value.optString("systemPrompt", "You are Mobdysseus, a private, concise assistant running entirely on this Android phone."),
+        ragTopK = value.optInt("ragTopK", 3),
+        voiceAutoSpeak = value.optBoolean("voiceAutoSpeak", false),
+        voiceSpeechRate = value.optDouble("voiceSpeechRate", 1.0).toFloat(),
+        voiceSpeechPitch = value.optDouble("voiceSpeechPitch", 1.0).toFloat(),
+        biometricLockEnabled = value.optBoolean("biometricLockEnabled", false),
+        notificationsEnabled = value.optBoolean("notificationsEnabled", true),
+        markdownPreviewDefault = value.optBoolean("markdownPreviewDefault", true),
+        autoSaveDrafts = value.optBoolean("autoSaveDrafts", true),
     )
 
     private fun JSONObject.requiredString(name: String): String = getString(name).also {

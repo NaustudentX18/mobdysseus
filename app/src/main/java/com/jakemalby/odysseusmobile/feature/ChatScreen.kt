@@ -108,7 +108,15 @@ internal fun ChatScreen(workspace: Workspace, update: ((Workspace) -> Workspace)
         generationJob = scope.launch {
             val assembler = StreamingTextAssembler()
             try {
-                runtime.streamReply("${localRetrievalContext(clean, workspace)}\n\nUser request: $clean").collect { chunk ->
+                val ragContext = localRetrievalContext(clean, workspace, workspace.settings.ragTopK)
+                val fullPrompt = if (ragContext.isNotBlank()) "$ragContext\n\nUser request: $clean" else clean
+                runtime.streamReply(
+                    prompt = fullPrompt,
+                    systemInstruction = workspace.settings.systemPrompt,
+                    temperature = workspace.settings.temperature,
+                    topP = workspace.settings.topP,
+                    topK = workspace.settings.topK,
+                ).collect { chunk ->
                     updateReply(update, conversationId, replyId, assembler.accept(chunk))
                 }
                 if (assembler.value().isBlank()) error("The local model returned an empty response.")
@@ -198,42 +206,46 @@ internal fun ChatScreen(workspace: Workspace, update: ((Workspace) -> Workspace)
             fontSize = 11.sp,
             modifier = Modifier.padding(bottom = 4.dp),
         )
-        Row(Modifier.fillMaxWidth().padding(bottom = 12.dp), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedTextField(prompt, { prompt = it }, Modifier.weight(1f).heightIn(min = 58.dp), placeholder = { Text("Message Mobdysseus…") }, maxLines = 5)
-            IconButton(
-                onClick = { if (context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) launchDictation(dictationLauncher) else microphonePermission.launch(Manifest.permission.RECORD_AUDIO) },
-                modifier = Modifier.size(56.dp).background(PanelRaised, RoundedCornerShape(18.dp)),
-                enabled = dictationAvailability != OfflineDictationAvailability.UNAVAILABLE,
-            ) { Icon(Icons.Outlined.Mic, "Dictate into draft for review", tint = Ink) }
-            if (generationJob?.isActive == true) {
-                OutlinedButton(
-                    onClick = { generationJob?.cancel(); generationJob = null },
-                    modifier = Modifier.heightIn(min = 56.dp),
-                ) { Text("Stop") }
-            } else {
-                IconButton(onClick = {
+        Row(
+            Modifier.fillMaxWidth().padding(bottom = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            OutlinedTextField(
+                prompt,
+                { prompt = it },
+                Modifier.weight(1f),
+                placeholder = { Text("Ask Mobdysseus…") },
+                maxLines = 4,
+            )
+            IconButton(onClick = {
+                if (context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) launchDictation(dictationLauncher)
+                else microphonePermission.launch(Manifest.permission.RECORD_AUDIO)
+            }) { Icon(Icons.Outlined.Mic, "Dictate prompt", tint = Muted) }
+            Button(
+                onClick = {
                     val clean = prompt.trim()
-                    if (clean.isBlank()) return@IconButton
-                    val conversationId = active.id
-                    val user = Message(UUID.randomUUID().toString(), "You", clean, true, System.currentTimeMillis())
-                    val replyId = UUID.randomUUID().toString()
-                    val pendingReply = Message(replyId, "Mobdysseus", "Thinking locally…", false, System.currentTimeMillis())
-                    update { state -> state.copy(conversations = state.conversations.map { conversation ->
-                        if (conversation.id == conversationId) conversation.copy(
-                            title = if (conversation.messages.isEmpty()) clean.take(34) else conversation.title,
-                            messages = conversation.messages + user + pendingReply,
-                        ) else conversation
-                    }) }
-                    prompt = ""
-                    generateReply(clean, conversationId, replyId)
-                }, Modifier.size(56.dp).background(Coral, RoundedCornerShape(18.dp))) { Icon(Icons.Outlined.Send, "Send", tint = Obsidian) }
-            }
+                    if (clean.isNotBlank()) {
+                        val userMessage = Message(UUID.randomUUID().toString(), "You", clean, true, System.currentTimeMillis())
+                        val replyId = UUID.randomUUID().toString()
+                        val pendingReply = Message(replyId, "Mobdysseus", "Thinking locally…", false, System.currentTimeMillis())
+                        update { state ->
+                            state.copy(conversations = state.conversations.map {
+                                if (it.id == active.id) it.copy(messages = it.messages + userMessage + pendingReply) else it
+                            })
+                        }
+                        prompt = ""
+                        generateReply(clean, active.id, replyId)
+                    }
+                },
+                enabled = generationJob?.isActive != true,
+            ) { Icon(Icons.Outlined.Send, "Send message") }
         }
     }
 }
 
 private fun updateReply(
-    update: (((Workspace) -> Workspace) -> Unit),
+    update: ((Workspace) -> Workspace) -> Unit,
     conversationId: String,
     replyId: String,
     text: String,
@@ -245,24 +257,40 @@ private fun updateReply(
     })
 }
 
-private fun localRetrievalContext(prompt: String, workspace: Workspace): String {
+private fun localRetrievalContext(prompt: String, workspace: Workspace, limit: Int = 3): String {
     val terms = prompt.lowercase().split(Regex("[^a-z0-9]+"))
         .filter { it.length > 2 }.toSet()
     fun score(text: String) = terms.count { term -> text.contains(term, ignoreCase = true) }
     val notes = workspace.notes.map { it to score("${it.title} ${it.body}") }
-        .filter { it.second > 0 }.sortedByDescending { it.second }.take(3)
+        .filter { it.second > 0 }.sortedByDescending { it.second }.take(limit)
         .map { "NOTE — ${it.first.title}: ${it.first.body.take(1200)}" }
     val memories = workspace.memories.map { it to score(it.text) }
-        .filter { it.second > 0 }.sortedByDescending { it.second }.take(3)
+        .filter { it.second > 0 }.sortedByDescending { it.second }.take(limit)
         .map { "MEMORY — ${it.first.text}" }
     val tasks = workspace.tasks.filter { !it.done && score(it.title) > 0 }
-        .take(3).map { "OPEN TASK — ${it.title}" }
+        .take(limit).map { "OPEN TASK — ${it.title}" }
     return (notes + memories + tasks).takeIf { it.isNotEmpty() }
         ?.joinToString("\n", prefix = "Private local context (use only if relevant):\n")
-        ?: "No matching private workspace context was found."
+        ?: ""
 }
-private fun launchDictation(launcher: ActivityResultLauncher<Intent>) { launcher.launch(Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply { putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM); putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak to Mobdysseus"); putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true) }) }
-private fun nativeReply(prompt: String, recipe: String, error: String? = null): String = when { !error.isNullOrBlank() -> "Local inference is not ready: $error"; prompt.contains("help", true) -> "I’m ready in $recipe mode. Your local modules are active; model execution will be added through the on-device runtime adapter."; prompt.contains("task", true) -> "I can turn that into a task from the Tasks module. Your workspace data stays on this phone."; else -> "Saved in your native Mobdysseus workspace. Select a downloadable on-device model in Cookbook to enable full local inference." }
+
+private fun launchDictation(launcher: ActivityResultLauncher<Intent>) {
+    launcher.launch(
+        Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak to Mobdysseus")
+            putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
+        },
+    )
+}
+
+private fun nativeReply(prompt: String, recipe: String, error: String? = null): String = when {
+    !error.isNullOrBlank() -> "Local inference is not ready: $error"
+    prompt.contains("help", true) -> "I’m ready in $recipe mode. Your local modules are active; model execution runs on-device."
+    prompt.contains("task", true) -> "I can turn that into a task from the Tasks module. Your workspace data stays on this phone."
+    else -> "Saved in your native Mobdysseus workspace. Select an installed on-device model in Cookbook to enable local inference."
+}
+
 @Composable
 private fun ChatBubble(
     message: Message,
@@ -273,62 +301,56 @@ private fun ChatBubble(
     onShare: () -> Unit,
     onRetry: (() -> Unit)? = null,
 ) {
-    val blocks = remember(message.text) { SafeMarkdownParser.parse(message.text) }
-    Box(
-        Modifier.fillMaxWidth(),
-        contentAlignment = if (message.mine) Alignment.CenterEnd else Alignment.CenterStart,
+    val blocks = remember(message.text) { parseSafeMarkdown(message.text) }
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 4.dp),
+        horizontalAlignment = if (message.mine) Alignment.End else Alignment.Start,
     ) {
-        Card(
-            Modifier.widthIn(max = 360.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = if (message.mine) Color(0xFF422B32) else Panel,
-            ),
-            border = BorderStroke(1.dp, Border),
+        Row(
+            Modifier.fillMaxWidth(0.92f),
+            horizontalArrangement = if (message.mine) Arrangement.End else Arrangement.Start,
         ) {
-            Column(Modifier.padding(14.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        message.author.uppercase(),
-                        color = if (message.mine) Coral else Muted,
-                        fontSize = 11.sp,
-                        fontFamily = FontFamily.Monospace,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.weight(1f),
-                    )
-                    Text(
-                        DateFormat.getTimeInstance(DateFormat.SHORT).format(Date(message.createdAt)),
-                        color = Muted,
-                        fontSize = 10.sp,
-                    )
-                    onSpeak?.let { speak ->
-                        IconButton(onClick = if (isSpeaking) onStopSpeaking else speak, modifier = Modifier.size(28.dp)) {
-                            Icon(
-                                if (isSpeaking) Icons.Outlined.VolumeOff else Icons.Outlined.VolumeUp,
-                                if (isSpeaking) "Stop reading response" else "Read response aloud",
-                                tint = Muted,
-                                modifier = Modifier.size(17.dp),
-                            )
+            Card(
+                colors = CardDefaults.cardColors(containerColor = if (message.mine) PanelRaised else Panel),
+                border = BorderStroke(1.dp, if (message.mine) Coral.copy(alpha = 0.5f) else Border),
+                shape = RoundedCornerShape(16.dp),
+            ) {
+                Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(
+                            message.author,
+                            fontWeight = FontWeight.Bold,
+                            color = if (message.mine) Coral else Ink,
+                            fontSize = 12.sp,
+                            fontFamily = FontFamily.Monospace,
+                        )
+                        if (!message.mine && onSpeak != null) {
+                            IconButton(onClick = if (isSpeaking) onStopSpeaking else onSpeak) {
+                                Icon(
+                                    if (isSpeaking) Icons.Outlined.VolumeOff else Icons.Outlined.VolumeUp,
+                                    if (isSpeaking) "Stop speaking" else "Speak response",
+                                    tint = if (isSpeaking) Coral else Muted,
+                                )
+                            }
                         }
                     }
-                }
-                Column(
-                    Modifier.padding(top = 5.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
                     blocks.forEach { block ->
                         when (block) {
-                            is SafeMarkdownBlock.Plain -> Text(block.text, lineHeight = 21.sp)
+                            is SafeMarkdownBlock.Paragraph -> Text(block.text, color = Ink, lineHeight = 20.sp, fontSize = 14.sp)
                             is SafeMarkdownBlock.Code -> SafeCodeBlock(block)
                         }
                     }
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-                    horizontalArrangement = Arrangement.End,
-                ) {
-                    TextButton(onClick = onCopy) { Text("Copy") }
-                    TextButton(onClick = onShare) { Text("Share") }
-                    onRetry?.let { retry -> TextButton(onClick = retry) { Text("Retry") } }
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        TextButton(onClick = onCopy) { Text("Copy") }
+                        TextButton(onClick = onShare) { Text("Share") }
+                        onRetry?.let { retry -> TextButton(onClick = retry) { Text("Retry") } }
+                    }
                 }
             }
         }

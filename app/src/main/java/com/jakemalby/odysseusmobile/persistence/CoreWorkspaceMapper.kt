@@ -23,14 +23,22 @@ object CoreWorkspaceMapper {
             localOnly = workspace.settings.localOnly,
             compactDensity = workspace.settings.compactDensity,
             theme = workspace.settings.theme,
+            temperature = workspace.settings.temperature,
+            topP = workspace.settings.topP,
+            topK = workspace.settings.topK,
+            maxTokens = workspace.settings.maxTokens,
+            systemPrompt = workspace.settings.systemPrompt,
+            ragTopK = workspace.settings.ragTopK,
+            voiceAutoSpeak = workspace.settings.voiceAutoSpeak,
+            voiceSpeechRate = workspace.settings.voiceSpeechRate,
+            voiceSpeechPitch = workspace.settings.voiceSpeechPitch,
+            biometricLockEnabled = workspace.settings.biometricLockEnabled,
+            notificationsEnabled = workspace.settings.notificationsEnabled,
+            markdownPreviewDefault = workspace.settings.markdownPreviewDefault,
+            autoSaveDrafts = workspace.settings.autoSaveDrafts,
         ),
     )
 
-    /**
-     * Core Workspace currently requires a selected conversation. A snapshot
-     * without one is valid for a future empty-state UI but cannot be silently
-     * coerced into today's core model without losing information.
-     */
     fun toWorkspace(snapshot: WorkspaceSnapshot): Workspace = Workspace(
         activeConversationId = requireNotNull(snapshot.activeConversationId) {
             "Current core Workspace cannot represent a null active conversation"
@@ -45,6 +53,19 @@ object CoreWorkspaceMapper {
             localOnly = snapshot.settings.localOnly,
             compactDensity = snapshot.settings.compactDensity,
             theme = snapshot.settings.theme,
+            temperature = snapshot.settings.temperature,
+            topP = snapshot.settings.topP,
+            topK = snapshot.settings.topK,
+            maxTokens = snapshot.settings.maxTokens,
+            systemPrompt = snapshot.settings.systemPrompt,
+            ragTopK = snapshot.settings.ragTopK,
+            voiceAutoSpeak = snapshot.settings.voiceAutoSpeak,
+            voiceSpeechRate = snapshot.settings.voiceSpeechRate,
+            voiceSpeechPitch = snapshot.settings.voiceSpeechPitch,
+            biometricLockEnabled = snapshot.settings.biometricLockEnabled,
+            notificationsEnabled = snapshot.settings.notificationsEnabled,
+            markdownPreviewDefault = snapshot.settings.markdownPreviewDefault,
+            autoSaveDrafts = snapshot.settings.autoSaveDrafts,
         ),
     )
 

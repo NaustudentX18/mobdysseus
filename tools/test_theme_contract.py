@@ -37,7 +37,7 @@ def test_theme_persistence_contract_and_room_migration() -> None:
     assert 'val theme: String = "OBSIDIAN_CORAL"' in entities_code
 
     db_code = DATABASE_FILE.read_text(encoding="utf-8")
-    assert "version = 4" in db_code
+    assert "version = 5" in db_code
     assert "MIGRATION_3_4" in db_code
     assert "ALTER TABLE workspace ADD COLUMN theme TEXT NOT NULL DEFAULT 'OBSIDIAN_CORAL'" in db_code
 

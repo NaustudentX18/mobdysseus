@@ -50,6 +50,19 @@ data class WorkspaceSettingsRecord(
     val localOnly: Boolean,
     val compactDensity: Boolean,
     val theme: String = "OBSIDIAN_CORAL",
+    val temperature: Float = 0.7f,
+    val topP: Float = 0.9f,
+    val topK: Int = 32,
+    val maxTokens: Int = 2048,
+    val systemPrompt: String = "You are Mobdysseus, a private, concise assistant running entirely on this Android phone.",
+    val ragTopK: Int = 3,
+    val voiceAutoSpeak: Boolean = false,
+    val voiceSpeechRate: Float = 1.0f,
+    val voiceSpeechPitch: Float = 1.0f,
+    val biometricLockEnabled: Boolean = false,
+    val notificationsEnabled: Boolean = true,
+    val markdownPreviewDefault: Boolean = true,
+    val autoSaveDrafts: Boolean = true,
 )
 
 /** Room, encrypted SQL, or another app-private store must implement this API. */

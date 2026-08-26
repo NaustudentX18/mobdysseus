@@ -30,8 +30,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.Psychology
+import androidx.compose.material.icons.outlined.RecordVoiceOver
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.Button
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -42,6 +46,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -215,13 +220,13 @@ internal fun MoreScreen(workspace: Workspace, update: ((Workspace) -> Workspace)
         )
     }
     LazyColumn(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        item { Text("More", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold); Text("Native controls and mobile equivalents for the rest of Mobdysseus.", color = Muted, modifier = Modifier.padding(top = 4.dp)) }
+        item { Text("More", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold); Text("Native controls, inference tuning, and mobile equivalents for Mobdysseus.", color = Muted, modifier = Modifier.padding(top = 4.dp)) }
         item {
             Card(colors = CardDefaults.cardColors(containerColor = Panel), border = BorderStroke(1.dp, Border)) {
                 Column(Modifier.padding(18.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Outlined.Settings, null, tint = Coral)
-                        Text("Privacy & runtime", fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 10.dp))
+                        Text("Privacy & Runtime", fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 10.dp))
                     }
                     SettingToggle("Local-only mode", "No server connection is required for the native workspace.", workspace.settings.localOnly) { checked ->
                         update { it.copy(settings = it.settings.copy(localOnly = checked)) }
@@ -239,6 +244,30 @@ internal fun MoreScreen(workspace: Workspace, update: ((Workspace) -> Workspace)
                 onThemeSelected = { chosen ->
                     update { it.copy(settings = it.settings.copy(theme = chosen.id)) }
                 }
+            )
+        }
+        item {
+            InferenceSettingsCard(
+                settings = workspace.settings,
+                onUpdate = { newSettings -> update { it.copy(settings = newSettings) } }
+            )
+        }
+        item {
+            RagSettingsCard(
+                settings = workspace.settings,
+                onUpdate = { newSettings -> update { it.copy(settings = newSettings) } }
+            )
+        }
+        item {
+            VoiceSettingsCard(
+                settings = workspace.settings,
+                onUpdate = { newSettings -> update { it.copy(settings = newSettings) } }
+            )
+        }
+        item {
+            EditorSettingsCard(
+                settings = workspace.settings,
+                onUpdate = { newSettings -> update { it.copy(settings = newSettings) } }
             )
         }
         item { DiagnosticsPanel(workspace) }
@@ -342,6 +371,160 @@ internal fun MoreScreen(workspace: Workspace, update: ((Workspace) -> Workspace)
             }
         }
         item { OutlinedButton(onClick = { pendingReset = true }, modifier = Modifier.fillMaxWidth()) { Text("Reset local workspace", color = Coral) } }
+    }
+}
+
+@Composable
+private fun InferenceSettingsCard(
+    settings: com.jakemalby.odysseusmobile.core.MobileSettings,
+    onUpdate: (com.jakemalby.odysseusmobile.core.MobileSettings) -> Unit,
+) {
+    Card(colors = CardDefaults.cardColors(containerColor = Panel), border = BorderStroke(1.dp, Border)) {
+        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Outlined.Tune, null, tint = Coral)
+                Text("Inference & Sampler Settings", fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 10.dp))
+            }
+            Text("Fine-tune on-device LLM generation parameters and system prompt.", color = Muted, fontSize = 12.sp)
+            HorizontalDivider(color = Border)
+            
+            OutlinedTextField(
+                value = settings.systemPrompt,
+                onValueChange = { onUpdate(settings.copy(systemPrompt = it.take(500))) },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("System Instruction Prompt") },
+                maxLines = 3,
+            )
+
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("Temperature: ${String.format(Locale.US, "%.2f", settings.temperature)}", fontWeight = FontWeight.SemiBold)
+                Text(if (settings.temperature < 0.3f) "Precise" else if (settings.temperature > 0.8f) "Creative" else "Balanced", color = Coral, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+            }
+            Slider(
+                value = settings.temperature,
+                onValueChange = { onUpdate(settings.copy(temperature = it)) },
+                valueRange = 0.0f..1.5f,
+                steps = 14,
+            )
+
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("Top-P Nucleus: ${String.format(Locale.US, "%.2f", settings.topP)}", fontWeight = FontWeight.SemiBold)
+                Text("${(settings.topP * 100).toInt()}%", color = Coral, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+            }
+            Slider(
+                value = settings.topP,
+                onValueChange = { onUpdate(settings.copy(topP = it)) },
+                valueRange = 0.1f..1.0f,
+                steps = 9,
+            )
+
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("Top-K Sample: ${settings.topK}", fontWeight = FontWeight.SemiBold)
+                Text("${settings.topK} candidates", color = Coral, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+            }
+            Slider(
+                value = settings.topK.toFloat(),
+                onValueChange = { onUpdate(settings.copy(topK = it.toInt())) },
+                valueRange = 8f..128f,
+                steps = 14,
+            )
+        }
+    }
+}
+
+@Composable
+private fun RagSettingsCard(
+    settings: com.jakemalby.odysseusmobile.core.MobileSettings,
+    onUpdate: (com.jakemalby.odysseusmobile.core.MobileSettings) -> Unit,
+) {
+    Card(colors = CardDefaults.cardColors(containerColor = Panel), border = BorderStroke(1.dp, Border)) {
+        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Outlined.Psychology, null, tint = Coral)
+                Text("RAG & Retrieval Depth", fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 10.dp))
+            }
+            Text("Controls how many matching private notes, memories, and tasks are fed into the chat context.", color = Muted, fontSize = 12.sp)
+            HorizontalDivider(color = Border)
+
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("Context Documents (Top-K): ${settings.ragTopK}", fontWeight = FontWeight.SemiBold)
+                Text("${settings.ragTopK} snippets", color = Coral, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+            }
+            Slider(
+                value = settings.ragTopK.toFloat(),
+                onValueChange = { onUpdate(settings.copy(ragTopK = it.toInt())) },
+                valueRange = 1f..8f,
+                steps = 6,
+            )
+        }
+    }
+}
+
+@Composable
+private fun VoiceSettingsCard(
+    settings: com.jakemalby.odysseusmobile.core.MobileSettings,
+    onUpdate: (com.jakemalby.odysseusmobile.core.MobileSettings) -> Unit,
+) {
+    Card(colors = CardDefaults.cardColors(containerColor = Panel), border = BorderStroke(1.dp, Border)) {
+        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Outlined.RecordVoiceOver, null, tint = Coral)
+                Text("Voice & Speech Engine", fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 10.dp))
+            }
+            Text("Configure offline-preferred speech synthesis rate and pitch.", color = Muted, fontSize = 12.sp)
+            HorizontalDivider(color = Border)
+
+            SettingToggle("Auto-speak AI responses", "Automatically read incoming assistant replies via TTS.", settings.voiceAutoSpeak) { checked ->
+                onUpdate(settings.copy(voiceAutoSpeak = checked))
+            }
+
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("Speech Rate: ${String.format(Locale.US, "%.1fx", settings.voiceSpeechRate)}", fontWeight = FontWeight.SemiBold)
+            }
+            Slider(
+                value = settings.voiceSpeechRate,
+                onValueChange = { onUpdate(settings.copy(voiceSpeechRate = it)) },
+                valueRange = 0.5f..2.0f,
+                steps = 14,
+            )
+
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("Speech Pitch: ${String.format(Locale.US, "%.1fx", settings.voiceSpeechPitch)}", fontWeight = FontWeight.SemiBold)
+            }
+            Slider(
+                value = settings.voiceSpeechPitch,
+                onValueChange = { onUpdate(settings.copy(voiceSpeechPitch = it)) },
+                valueRange = 0.5f..2.0f,
+                steps = 14,
+            )
+        }
+    }
+}
+
+@Composable
+private fun EditorSettingsCard(
+    settings: com.jakemalby.odysseusmobile.core.MobileSettings,
+    onUpdate: (com.jakemalby.odysseusmobile.core.MobileSettings) -> Unit,
+) {
+    Card(colors = CardDefaults.cardColors(containerColor = Panel), border = BorderStroke(1.dp, Border)) {
+        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Outlined.EditNote, null, tint = Coral)
+                Text("Editor & Automation", fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 10.dp))
+            }
+            Text("Customize markdown behavior and workspace autosave.", color = Muted, fontSize = 12.sp)
+            HorizontalDivider(color = Border)
+
+            SettingToggle("Autosave draft edits", "Preserve in-progress note and task drafts across app restarts.", settings.autoSaveDrafts) { checked ->
+                onUpdate(settings.copy(autoSaveDrafts = checked))
+            }
+            SettingToggle("Render markdown by default", "Display formatted rich text in notes and chat bubbles.", settings.markdownPreviewDefault) { checked ->
+                onUpdate(settings.copy(markdownPreviewDefault = checked))
+            }
+            SettingToggle("Task notification alarms", "Deliver scheduled reminders via Android WorkManager.", settings.notificationsEnabled) { checked ->
+                onUpdate(settings.copy(notificationsEnabled = checked))
+            }
+        }
     }
 }
 
@@ -496,10 +679,25 @@ private fun workspaceSearch(workspace: Workspace, query: String): List<String> {
 }
 
 @Composable
-private fun SettingToggle(title: String, detail: String, checked: Boolean, change: (Boolean) -> Unit) { Row(Modifier.fillMaxWidth().padding(top = 14.dp), verticalAlignment = Alignment.CenterVertically) { Column(Modifier.weight(1f)) { Text(title, fontWeight = FontWeight.SemiBold); Text(detail, color = Muted, fontSize = 12.sp, modifier = Modifier.padding(top = 2.dp)) }; Switch(checked, change) } }
+private fun SettingToggle(title: String, detail: String, checked: Boolean, change: (Boolean) -> Unit) {
+    Row(Modifier.fillMaxWidth().padding(top = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.weight(1f)) {
+            Text(title, fontWeight = FontWeight.SemiBold)
+            Text(detail, color = Muted, fontSize = 12.sp, modifier = Modifier.padding(top = 2.dp))
+        }
+        Switch(checked, change)
+    }
+}
 
 @Composable
-private fun FeatureCard(title: String, detail: String) { Card(colors = CardDefaults.cardColors(containerColor = Panel), border = BorderStroke(1.dp, Border)) { Column(Modifier.padding(18.dp)) { Text(title, fontWeight = FontWeight.Bold); Text(detail, color = Muted, modifier = Modifier.padding(top = 7.dp)) } } }
+private fun FeatureCard(title: String, detail: String) {
+    Card(colors = CardDefaults.cardColors(containerColor = Panel), border = BorderStroke(1.dp, Border)) {
+        Column(Modifier.padding(18.dp)) {
+            Text(title, fontWeight = FontWeight.Bold)
+            Text(detail, color = Muted, modifier = Modifier.padding(top = 7.dp))
+        }
+    }
+}
 
 private fun displayName(context: Context, uri: Uri): String? = context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
     if (cursor.moveToFirst()) cursor.getString(cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME)) else null
